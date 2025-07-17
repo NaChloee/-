@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>提成工资管理平台 - 原型 (最终审批流版)</title>
+    <style>
+        /* --- General Styles & Fonts --- */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body, html { margin: 0; padding: 0; font-family: 'Noto Sans SC', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; height: 100%; }
+        /* --- Main Layout --- */
+        .container { display: flex; height: 100vh; }
+        .sidebar { width: 240px; background-color: #ffffff; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        /* --- Header --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; height: 60px; box-sizing: border-box;}
+        .header .user-info { display: flex; align-items: center; font-size: 14px; }
+        .header .user-info span { margin-left: 15px; }
+        .header .user-info .role-switcher { margin-left: 20px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+        /* --- Sidebar Navigation --- */
+        .logo { padding: 0 25px 20px 25px; border-bottom: 1px solid #f0f0f0; }
+        .logo img { width: 100px; }
+        .nav-menu { list-style: none; padding: 15px 0; margin: 0; flex-grow: 1; }
+        .nav-menu li { padding: 12px 25px; cursor: pointer; font-size: 14px; color: #444; display: flex; align-items: center; transition: all 0.2s ease; border-left: 3px solid transparent; }
+        .nav-menu li.active, .nav-menu li:hover { background-color: #f0f3ff; color: #e60012; border-left-color: #e60012; }
+        .nav-menu li svg { margin-right: 15px; width: 18px; height: 18px; fill: currentColor; }
+        .nav-menu li.specialist-only, .nav-menu li.employee-only { display: none; }
+        /* --- Main Content Area --- */
+        .page { display: none; padding: 25px 30px; }
+        .page.active { display: block; }
+        .page h1 { font-size: 24px; font-weight: 500; color: #222; margin-top: 0; margin-bottom: 20px; }
+        /* --- UI Components --- */
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #eee; }
+        .card-header h2 { margin: 0; font-size: 18px; font-weight: 500; }
+        .page-actions { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background-color: #f8f9fa; font-weight: 500; }
+        tbody tr:not(.no-hover) { cursor: pointer; }
+        tbody tr:not(.no-hover):hover { background-color: #f5f5f5; }
+        .status { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; display: inline-block; }
+        .status-pending { background-color: #fff0c2; color: #8c6c00; }
+        .status-approved { background-color: #c8e6c9; color: #256029; }
+        .status-rejected { background-color: #ffcdd2; color: #c62828; }
+        .status-verification { background-color: #b3e5fc; color: #01579b; }
+        .status-modification { background-color: #d1c4e9; color: #4527a0; }
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s ease; }
+        .btn-primary { background-color: #e60012; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-outline { background-color: transparent; border: 1px solid #6c757d; color: #6c757d; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        /* --- Modal Styles --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+        .modal-content { background-color: #fefefe; margin: 8% auto; padding: 25px; border: 1px solid #888; width: 60%; max-width: 800px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: slideIn 0.3s; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h2 { margin: 0; font-size: 20px; }
+        .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-body { max-height: 60vh; overflow-y: auto; padding-right: 15px;}
+        .modal-footer { padding-top: 20px; margin-top: 20px; border-top: 1px solid #ddd; text-align: right; }
+        .modal-footer .btn { margin-left: 10px; }
+        .form-group, .detail-group { margin-bottom: 15px; }
+        .form-group label, .detail-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; font-size: 14px;}
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .detail-group p { margin: 0; padding: 8px; background: #f9f9f9; border-radius: 4px; min-height: 18px; }
+        .allocation-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .allocation-row input { width: 80px; }
+        .allocation-row .total { margin-left: auto; font-weight: bold; }
+        .remove-employee-btn { background: none; border: none; color: #e60012; cursor: pointer; font-weight: bold; font-size: 16px; padding: 0 5px;}
+        #manage-participants { border-top: 1px solid #eee; margin-top: 20px; padding-top: 15px; }
+        .comparison-view { display: flex; gap: 20px; padding: 10px; background: #fafafa; border-radius: 4px; }
+        .comparison-view > div { flex: 1; }
+        .comparison-view h4 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .comparison-view .old { text-decoration: line-through; color: #888; }
+        .comparison-view .new { color: #e60012; font-weight: bold; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes slideIn { from {transform: translateY(-50px);} to {transform: translateY(0);} }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMzUiPjxwYXRoIGZpbGw9IiNFNjAwMTIiIGQ9Ik0xMy4zIDM0LjFoNy40di05LjZoLTMuN2wtMi4xIDUuMy0yLjEtNS4zaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJ6bTguMS0xMy45aDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTAuMiAxMy45aDQuM3YtMTguNWgtNC4zdjE4LjV6bTkuOCAwdi0xMy45aDkuNHYtNC42aC0xMy43djE4LjVoNC4zem0xMS4yLTE4LjVoNC4zdjEzLjloNC4zdi0xOC41aC0xM3Y0LjZoNC40em0yMS4yIDkuNmgtMy43bC0yLjEgNS4zLTIuMS01LjzaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJoMy45bDIuMS01LjJ2NC41aDQuMnYtOS42aC0zLjd6bTguMS05LjZoNC4zdjE4LjVoLTQuM3YtMTh6bTkuMiAwaDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTMuMSAwYzIuNCAwIDQuMyAxLjkgNC4zIDQuM3MtMS45IDQuMy00LjIgNC4zaC00LjJ2NS4zaDQuMnY0LjZoLTguNXYtMThoNC4zem0wIDQuNmgtMy44YzEuNyAwIDIuOC0xLjEgMi44LTIuOHMtMS4xLTIuNy0yLjgtMi43aC0uM3Y1LjV6Ii8+PC9zdmc+" alt="HITACHI Logo"></div>
+            <ul class="nav-menu">
+                <li class="active" data-page="home"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>首页</li>
+                <li data-page="allocation"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path></svg>业务分配与确认</li>
+                <li data-page="modification-processing"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg>修改申请追踪</li>
+                <li data-page="employee-requests-approval" class="specialist-only"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 15l-4-4h8l-4 4zM5 12h14v-2H5v2z"></path></svg>员工申请审批</li>
+             </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                 <div></div>
+                <div class="user-info">
+                    切换角色: 
+                    <select id="role-switcher" class="role-switcher">
+                        <option value="specialist">核算专员</option>
+                        <option value="employee">普通员工 (张三)</option>
+                    </select>
+                    <span>你好, <span id="user-name">核算专员 (000797881)</span></span>
+                </div>
+            </div>
+            <div id="page-home" class="page active"><h1>欢迎使用提成工资管理平台</h1><p>这是一个功能完备的系统原型，请使用右上角的角色切换器来体验核算专员和普通员工的不同操作视角和权限。</p></div>
+            <div id="page-allocation" class="page">
+                <h1>业务分配与确认</h1>
+                <div class="page-actions" id="allocation-page-actions"></div>
+                <div class="card"><div class="card-header"><h2>业务列表 (点击条目查看详情或修改)</h2></div><table id="allocation-table"><thead><tr><th>合同号/工号</th><th>项目名称</th><th>分配方案</th><th>状态</th></tr></thead><tbody></tbody></table></div>
+            </div>
+            <div id="page-modification-processing" class="page">
+                <h1>修改申请追踪</h1>
+                <div class="card"><div class="card-header"><h2 id="modification-page-title">我提交的修改申请</h2></div><table id="modification-table"><thead><tr><th>申请ID</th><th>相关合同号</th><th>申请类型</th><th>申请状态</th><th>审批状态</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+            </div>
+            <div id="page-employee-requests-approval" class="page">
+                <h1>员工申请审批</h1>
+                <div class="card"><div class="card-header"><h2>待我审批的员工修改申请</h2></div><table id="employee-approval-table"><thead><tr><th>申请ID</th><th>合同号</th><th>申请人</th><th>申请内容</th><th>原比例</th><th>新比例</th><th>操作</th></tr></thead><tbody></tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="details-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2 id="details-modal-title"></h2><span class="close-btn">&times;</span></div><div class="modal-body" id="details-modal-body"></div><div class="modal-footer" id="details-modal-footer"></div></div></div>
+    <div id="allocation-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>修改分配方案</h2><span class="close-btn">&times;</span></div><div class="modal-body"><p><strong>合同号:</strong> <span id="alloc-modal-contract-id"></span></p><div class="form-group"><label>分配方案</label><div id="modal-allocations"></div></div><div id="manage-participants"><label>管理参与人员</label><div class="allocation-row"><select id="employee-to-add"></select><button class="btn btn-sm btn-outline" onclick="addEmployeeToAllocation()">添加员工</button><span class="total">当前总计: <span id="alloc-total">0</span>%</span></div></div></div><div class="modal-footer"><button class="btn btn-outline close-btn">取消</button><button id="save-allocation-btn" class="btn btn-primary">保存</button></div></div></div>
+    <div id="add-missing-business-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>补充遗漏业务条目</h2><span class="close-btn">&times;</span></div><div class="modal-body"><p>请填写您参与过但未在列表中显示的业务信息。</p><div class="form-group"><label for="missing-contract-id">合同号 / 电梯工号</label><input type="text" id="missing-contract-id"></div><div class="form-group"><label for="missing-notes">备注说明</label><textarea id="missing-notes" rows="3"></textarea></div></div><div class="modal-footer"><button class="btn btn-outline close-btn">取消</button><button id="submit-missing-business-btn" class="btn btn-primary">提交核实</button></div></div></div>
+    <div id="modification-approval-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>审批修改申请</h2><span class="close-btn">&times;</span></div><div class="modal-body" id="mod-approval-body"></div><div class="modal-footer"><button id="reject-modification-btn" class="btn btn-secondary">驳回申请</button><button id="approve-modification-btn" class="btn btn-primary">批准修改</button></div></div></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // --- DATA ---
+    let currentUserRole = 'specialist'; 
+    let activeItemId = null;
+    const employees = [ { id: 'E001', name: '张三' }, { id: 'E002', name: '李四' }, { id: 'E003', name: '王五' }, { id: 'E004', name: '赵六' } ];
+    let businessData = [
+        { id: 1, contractId: 'HT2025-07-001', project: '大型商场电梯维保', amount: 50000, client: '环球购物中心', status: 'pending_allocation', finalAllocation: [] },
+        { id: 3, contractId: 'HT2025-06-113', project: 'A栋写字楼季度保养', amount: 30000, client: '万科地产', status: 'pending_confirmation', finalAllocation: [{ employee: '张三', ratio: 80, confirmed: false }, { employee: '李四', ratio: 20, confirmed: false }] },
+        { id: 4, contractId: 'HT2025-06-105', project: 'B座公寓电梯更换', amount: 180000, client: '绿地集团', status: 'approved', finalAllocation: [{ employee: '张三', ratio: 50, confirmed: true }, { employee: '王五', ratio: 50, confirmed: true }] },
+        { id: 5, contractId: 'HT2025-06-108', project: 'C栋电梯大修', amount: 95000, client: '华润置地', status: 'approved', finalAllocation: [{ employee: '李四', ratio: 100, confirmed: true }] }
+    ];
+    let modificationRequests = [
+        { id: 'MOD-001', businessId: 5, contractId: 'HT2025-06-108', timestamp: '2025/07/15', approvalStatus: 'pending', type: 'specialist_rewrite', submitter: '核算专员', oldAllocation: [{ employee: '李四', ratio: 100 }], newAllocation: [{ employee: '李四', ratio: 70 }, { employee: '赵六', ratio: 30 }] },
+        { id: 'MOD-002', businessId: 4, contractId: 'HT2025-06-105', timestamp: '2025/07/16', approvalStatus: 'pending', type: 'employee_suggestion', submitter: '张三', change: { from: 50, to: 60 } },
+        { id: 'MOD-003', businessId: 4, contractId: 'HT2025-06-105', timestamp: '2025/07/14', approvalStatus: 'approved', type: 'employee_suggestion', submitter: '王五', change: { from: 40, to: 50 } },
+        { id: 'MOD-004', businessId: 3, contractId: 'HT2025-06-113', timestamp: '2025/07/13', approvalStatus: 'rejected', type: 'employee_suggestion', submitter: '李四', change: { from: 20, to: 25 } },
+    ];
+
+    // --- RENDER FUNCTIONS ---
+    const getStatusBadge = (status) => {
+        const statuses = { 'pending_allocation': '<span class="status status-pending">待分配比例</span>', 'pending_verification': '<span class="status status-verification">待专员核实</span>', 'pending_confirmation': '<span class="status status-pending">待员工确认</span>', 'approved': '<span class="status status-approved">已审批</span>', 'modification_pending': '<span class="status status-modification">修改待审批</span>' };
+        return statuses[status] || status;
+    };
+    const formatAllocation = (allocation) => (!allocation || allocation.length === 0) ? '未分配' : allocation.map(a => `${a.employee}: ${a.ratio}%`).join('; ');
+
+    function renderAllocationTable() {
+        const actionsDiv = document.getElementById('allocation-page-actions');
+        actionsDiv.innerHTML = (currentUserRole === 'employee') ? `<button class="btn btn-primary" onclick="openAddMissingBusinessModal()">补充遗漏业务</button>` : '';
+        const tbody = document.getElementById('allocation-table').querySelector('tbody');
+        tbody.innerHTML = '';
+        businessData.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.onclick = () => openDetailsModal(item.id);
+            tr.innerHTML = `<td>${item.contractId}</td><td>${item.project}</td><td>${formatAllocation(item.finalAllocation)}</td><td>${getStatusBadge(item.status)}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderModificationProcessingTable() {
+        const title = document.getElementById('modification-page-title');
+        const tbody = document.getElementById('modification-table').querySelector('tbody');
+        tbody.innerHTML = '<tr class="no-hover"><td colspan="6">暂无相关记录。</td></tr>';
+        
+        let dataToRender = modificationRequests;
+        title.textContent = '全部修改申请追踪';
+
+        if (dataToRender.length > 0) {
+            tbody.innerHTML = '';
+            dataToRender.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.classList.add('no-hover');
+                const approvalStatusBadges = { pending: '<span class="status status-pending">待审批</span>', approved: '<span class="status status-approved">已批准</span>', rejected: '<span class="status status-rejected">已驳回</span>' };
+                const pushButton = (req.approvalStatus !== 'pending') ? `<button class="btn btn-sm btn-outline" onclick="alert('已向相关人员推送关于 ${req.id} 的结果通知。')">推送通知</button>` : '—';
+                
+                tr.innerHTML = `<td>${req.id}</td><td>${req.contractId}</td><td>${req.type === 'employee_suggestion' ? `员工建议(${req.submitter})` : '专员重分配'}</td><td>${req.timestamp}</td><td>${approvalStatusBadges[req.approvalStatus]}</td><td>${pushButton}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    function renderEmployeeRequestsApprovalTable() {
+        const tbody = document.getElementById('employee-approval-table').querySelector('tbody');
+        tbody.innerHTML = '<tr class="no-hover"><td colspan="7">暂无待审批的员工申请。</td></tr>';
+        if(currentUserRole !== 'specialist') return;
+
+        const dataToRender = modificationRequests.filter(req => req.type === 'employee_suggestion' && req.approvalStatus === 'pending');
+
+        if (dataToRender.length > 0) {
+            tbody.innerHTML = '';
+            dataToRender.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.classList.add('no-hover');
+                tr.innerHTML = `<td>${req.id}</td><td>${req.contractId}</td><td>${req.submitter}</td><td>比例修改申请</td><td class="old">${req.change.from}%</td><td class="new">${req.change.to}%</td><td><button class="btn btn-primary btn-sm" onclick="openModificationApprovalModal('${req.id}')">审批</button></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+    
+    // --- MODAL & ACTION LOGIC ---
+    window.openDetailsModal = function(itemId) {
+        activeItemId = itemId; const item = businessData.find(d => d.id === itemId); const modal = document.getElementById('details-modal'); const body = document.getElementById('details-modal-body'); const footer = document.getElementById('details-modal-footer');
+        document.getElementById('details-modal-title').textContent = `详情: ${item.contractId}`;
+        if (currentUserRole === 'specialist') {
+            body.innerHTML = `<div class="form-group"><label>项目名称</label><input id="detail-project" value="${item.project}"></div><div class="form-group"><label>客户</label><input id="detail-client" value="${item.client || ''}"></div><div class="form-group"><label>金额</label><input type="number" id="detail-amount" value="${item.amount}"></div>`;
+            footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button><button class="btn btn-primary" onclick="saveDetails(${item.id})">保存基础信息</button><button class="btn btn-primary" onclick="openAllocationModal(${item.id})">修改分配方案</button>`;
+        } else {
+            const myAlloc = item.finalAllocation.find(a => a.employee === '张三'); body.innerHTML = `<div class="detail-group"><label>项目名称</label><p>${item.project}</p></div>`;
+            if (myAlloc) {
+                body.innerHTML += `<div class="form-group"><label for="employee-ratio-input">我的提成比例 (%)</label><input type="number" id="employee-ratio-input" value="${myAlloc.ratio}" ${item.status === 'approved' ? '' : ''}></div>`;
+                footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button><button class="btn btn-primary" onclick="submitRatioChangeSuggestion(${item.id})">提交修改建议</button>`;
+            } else { footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button>`; }
+        }
+        modal.style.display = 'block';
+    };
+    
+    window.openModificationApprovalModal = function(reqId) {
+        const req = modificationRequests.find(r => r.id === reqId); const body = document.getElementById('mod-approval-body'); let comparisonHtml = '';
+        if (req.type === 'employee_suggestion') {
+            comparisonHtml = `<h4>员工 [${req.submitter}] 提议修改比例</h4><div class="comparison-view"><div><h4>修改前</h4><p class="old">${req.change.from}%</p></div><div><h4>修改后</h4><p class="new">${req.change.to}%</p></div></div>`;
+        } else { comparisonHtml = `<h4>专员重分配方案</h4><div class="comparison-view"><div><h4>修改前</h4><p class="old">${formatAllocation(req.oldAllocation)}</p></div><div><h4>修改后</h4><p class="new">${formatAllocation(req.newAllocation)}</p></div></div>`; }
+        body.innerHTML = `<p><strong>合同号:</strong> ${req.contractId}</p>${comparisonHtml}`;
+        document.getElementById('approve-modification-btn').onclick = () => approveModification(reqId); document.getElementById('reject-modification-btn').onclick = () => rejectModification(reqId);
+        document.getElementById('modification-approval-modal').style.display = 'block';
+    }
+
+    window.approveModification = function(reqId) {
+        const req = modificationRequests.find(r => r.id === reqId); const item = businessData.find(b => b.id === req.businessId);
+        if (req.type === 'employee_suggestion') { const employeeAlloc = item.finalAllocation.find(a => a.employee === req.submitter); if(employeeAlloc) employeeAlloc.ratio = req.change.to;
+        } else { item.finalAllocation = req.newAllocation; }
+        item.status = 'pending_confirmation'; item.finalAllocation.forEach(a => a.confirmed = false); req.approvalStatus = 'approved';
+        alert(`修改申请 ${req.id} 已批准，业务数据已更新。`); closeModal('modification-approval-modal'); renderAll();
+    }
+    
+    window.rejectModification = function(reqId) {
+        const req = modificationRequests.find(r => r.id === reqId); const item = businessData.find(b => b.id === req.businessId);
+        item.status = 'approved'; req.approvalStatus = 'rejected';
+        alert(`修改申请 ${req.id} 已被驳回。`); closeModal('modification-approval-modal'); renderAll();
+    }
+    
+    window.submitRatioChangeSuggestion = function(itemId) {
+        const item = businessData.find(d => d.id === itemId); const myOldAlloc = item.finalAllocation.find(a => a.employee === '张三');
+        if (!myOldAlloc) { alert("错误：找不到您的分配信息。"); return; }
+        const newRatio = Number(document.getElementById('employee-ratio-input').value);
+        if (newRatio === myOldAlloc.ratio) { alert('比例未改变。'); return; }
+        const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0');
+        modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString(), approvalStatus: 'pending', type: 'employee_suggestion', submitter: '张三', change: { from: myOldAlloc.ratio, to: newRatio } });
+        item.status = 'modification_pending'; alert('您的修改建议已提交给核算专员审核。'); closeModal('details-modal'); renderAll();
+    }
+    
+    // Other functions (saveDetails, openAllocationModal, etc.) remain the same
+    window.saveDetails = function(itemId) {
+        const item = businessData.find(d => d.id === itemId); item.project = document.getElementById('detail-project').value; item.client = document.getElementById('detail-client').value; item.amount = Number(document.getElementById('detail-amount').value);
+        alert('基础信息已保存！'); closeModal('details-modal'); renderAll();
+    }
+    window.openAllocationModal = function(itemId) {
+        activeItemId = itemId; const item = businessData.find(d => d.id === itemId); const modal = document.getElementById('allocation-modal');
+        document.getElementById('alloc-modal-contract-id').textContent = item.contractId; const empSelect = document.getElementById('employee-to-add'); empSelect.innerHTML = employees.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+        const allocationDiv = document.getElementById('modal-allocations'); let currentEditableAllocation = JSON.parse(JSON.stringify(item.finalAllocation.length > 0 ? item.finalAllocation : []));
+        const renderRows = () => { allocationDiv.innerHTML = ''; currentEditableAllocation.forEach(alloc => { allocationDiv.innerHTML += `<div class="allocation-row"><label>${alloc.employee}:</label><input type="number" class="alloc-input" data-employee="${alloc.employee}" value="${alloc.ratio}"> %<button class="remove-employee-btn" onclick="removeEmployeeFromAllocation('${alloc.employee}')">&times;</button></div>`; }); updateTotal(); };
+        const updateTotal = () => { let total = 0; modal.querySelectorAll('.alloc-input').forEach(input => total += Number(input.value) || 0); document.getElementById('alloc-total').textContent = total; document.getElementById('alloc-total').style.color = total > 100 ? '#e60012' : '#256029'; };
+        window.addEmployeeToAllocation = () => { const empName = empSelect.value; if (!currentEditableAllocation.some(a => a.employee === empName)) { currentEditableAllocation.push({ employee: empName, ratio: 0, confirmed: false }); renderRows(); } };
+        window.removeEmployeeFromAllocation = (empName) => { currentEditableAllocation = currentEditableAllocation.filter(a => a.employee !== empName); renderRows(); };
+        document.getElementById('save-allocation-btn').onclick = () => { const newAllocation = []; let total = 0; modal.querySelectorAll('.alloc-input').forEach(input => { const ratio = Number(input.value); total += ratio; if(ratio > 0) newAllocation.push({ employee: input.dataset.employee, ratio, confirmed: false }); }); if (total > 100) { alert('错误：分配总比例不能超过100%！'); return; } if (item.status === 'approved' || item.status === 'modification_pending') { const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0'); modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString(), approvalStatus: 'pending', type: 'specialist_rewrite', submitter: '核算专员', oldAllocation: item.finalAllocation, newAllocation: newAllocation }); item.status = 'modification_pending'; alert('修改已保存，已生成申请并推送到处理中心待审批。'); } else { item.finalAllocation = newAllocation; item.status = 'pending_confirmation'; alert('分配方案已保存，请等待员工确认。'); } closeModal('allocation-modal'); closeModal('details-modal'); renderAll(); };
+        allocationDiv.oninput = updateTotal; renderRows(); modal.style.display = 'block';
+    }
+    window.openAddMissingBusinessModal = () => document.getElementById('add-missing-business-modal').style.display = 'block';
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+    // --- INIT & NAVIGATION ---
+    const switchPage = (pageId) => {
+        document.querySelectorAll('.nav-menu li').forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`.nav-menu li[data-page="${pageId}"]`);
+        if (link) link.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + pageId));
+        renderAll();
+    };
+    
+    const renderAll = () => {
+        renderAllocationTable();
+        renderModificationProcessingTable();
+        renderEmployeeRequestsApprovalTable();
+    }
+
+    document.querySelectorAll('.nav-menu li').forEach(link => link.addEventListener('click', () => switchPage(link.dataset.page)));
+    document.getElementById('role-switcher').addEventListener('change', (e) => { 
+        currentUserRole = e.target.value; 
+        document.getElementById('user-name').textContent = currentUserRole === 'specialist' ? '核算专员 (000797881)' : '员工 (张三)';
+        document.querySelector('.nav-menu li.specialist-only').style.display = (currentUserRole === 'specialist') ? 'flex' : 'none';
+        switchPage('allocation'); 
+    });
+    
+    document.querySelectorAll('.modal .close-btn').forEach(btn => btn.onclick = () => btn.closest('.modal').style.display = 'none');
+    switchPage('home'); // Initial load to show the homepage.
+    document.querySelector('.nav-menu li.specialist-only').style.display = 'flex'; // Show specialist tab by default
+});
+</script>
+
+</body>
+</html>
