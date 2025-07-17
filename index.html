@@ -19,14 +19,17 @@
             --hitachi-red: #e60012;
             --shadow-color: rgba(0, 0, 0, 0.2);
 
-            --status-pending-bg: #4a4a28;
-            --status-pending-text: #f0e68c;
-            --status-approved-bg: #1e4d2b;
-            --status-approved-text: #a7d7b5;
-            --status-rejected-bg: #5c2c2c;
-            --status-rejected-text: #f4c2c2;
+            --status-unconfirmed-bg: #4a4a28;
+            --status-unconfirmed-text: #f0e68c;
+            --status-confirmed-bg: #1e4d2b;
+            --status-confirmed-text: #a7d7b5;
+            --status-abnormal-bg: #5c2c2c;
+            --status-abnormal-text: #f4c2c2;
             --status-modification-bg: #3a2d5c;
             --status-modification-text: #d9c8f5;
+
+            --change-old-text: #f4c2c2;
+            --change-new-text: #a7d7b5;
 
             --transition-speed: 0.3s;
         }
@@ -39,160 +42,105 @@
             --text-secondary: #6c757d;
             --shadow-color: rgba(0, 0, 0, 0.05);
 
-            --status-pending-bg: #fff0c2;
-            --status-pending-text: #8c6c00;
-            --status-approved-bg: #c8e6c9;
-            --status-approved-text: #256029;
-            --status-rejected-bg: #ffcdd2;
-            --status-rejected-text: #c62828;
+            --status-unconfirmed-bg: #fff0c2;
+            --status-unconfirmed-text: #8c6c00;
+            --status-confirmed-bg: #c8e6c9;
+            --status-confirmed-text: #256029;
+            --status-abnormal-bg: #ffcdd2;
+            --status-abnormal-text: #c62828;
             --status-modification-bg: #d1c4e9;
             --status-modification-text: #4527a0;
+            
+            --change-old-text: #c62828;
+            --change-new-text: #256029;
         }
 
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Noto Sans SC', 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-dark); 
-            color: var(--text-primary); 
-            height: 100%; 
-            font-size: 14px;
+            margin: 0; padding: 0; font-family: 'Noto Sans SC', 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: var(--bg-dark); color: var(--text-primary); height: 100%; font-size: 14px;
             transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
         }
 
-        /* --- Main Layout --- */
-        .container { display: flex; height: 100vh; }
-        .sidebar { 
-            width: 240px; 
-            background-color: var(--bg-light); 
-            border-right: 1px solid var(--border-color); 
-            display: flex; 
-            flex-direction: column; 
-            padding-top: 20px; 
-            flex-shrink: 0;
-            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
-        }
+        .container { display: flex; height: 100vh; transition: all var(--transition-speed) ease; }
+        .sidebar { width: 240px; background-color: var(--bg-light); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding-top: 20px; flex-shrink: 0; transition: all var(--transition-speed) ease; }
         .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
-        /* --- Header --- */
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px 30px; 
-            background-color: var(--bg-light); 
-            border-bottom: 1px solid var(--border-color); 
-            height: 60px; 
-            box-sizing: border-box;
-            flex-shrink: 0;
-            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
-        }
-        .header .user-info { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--text-secondary); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 30px; background-color: var(--bg-light); border-bottom: 1px solid var(--border-color); height: 60px; box-sizing: border-box; flex-shrink: 0; transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease; }
+        .header .user-info { display: flex; align-items: center; gap: 15px; font-size: 14px; color: var(--text-secondary); }
         .header .user-info .role-area { display: flex; align-items: center; gap: 10px;}
         .header .user-info #user-name { color: var(--text-primary); font-weight: 500;}
 
-        /* --- Theme Switcher --- */
-        .theme-switcher { display: flex; align-items: center; cursor: pointer; }
+        .view-mode-switcher, .theme-switcher { display: flex; align-items: center; cursor: pointer; }
+        .view-mode-switcher .icon { width: 24px; height: 24px; color: var(--text-secondary); }
+        .view-mode-switcher .icon:hover { color: var(--text-primary); }
+        #desktop-icon { display: none; }
         .theme-switcher input { display: none; }
-        .theme-switcher .slider {
-            width: 50px; height: 26px; background-color: #3e4450;
-            border-radius: 13px; position: relative; transition: background-color var(--transition-speed) ease;
-        }
-        .theme-switcher .slider:before {
-            content: ''; position: absolute;
-            height: 20px; width: 20px; left: 3px; bottom: 3px;
-            background-color: white; border-radius: 50%;
-            transition: transform var(--transition-speed) ease;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231a1d24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.836 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.894 17.836a.75.75 0 00-1.06-1.061l-1.591 1.59a.75.75 0 101.06 1.06l1.591-1.59zM3 12a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h2.25A.75.75 0 013 12zM6.106 6.106a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" /></svg>');
-            background-size: 14px; background-repeat: no-repeat; background-position: center;
-        }
+        .theme-switcher .slider { width: 50px; height: 26px; background-color: #3e4450; border-radius: 13px; position: relative; transition: background-color var(--transition-speed) ease; }
+        .theme-switcher .slider:before { content: ''; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: transform var(--transition-speed) ease; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231a1d24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.836 17.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.894 17.836a.75.75 0 00-1.06-1.061l-1.591 1.59a.75.75 0 101.06 1.06l1.591-1.59zM3 12a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h2.25A.75.75 0 013 12zM6.106 6.106a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" /></svg>'); background-size: 14px; background-repeat: no-repeat; background-position: center; }
         .theme-switcher input:checked + .slider { background-color: var(--accent-primary); }
-        .theme-switcher input:checked + .slider:before {
-            transform: translateX(24px);
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231a1d24"><path d="M21.75 12.016a9.72 9.72 0 01-9.72 9.72A9.72 9.72 0 012.25 12.016a9.72 9.72 0 019.72-9.72 9.72 9.72 0 019.78 9.72zM12 3.25A8.75 8.75 0 1012 20.75 8.75 8.75 0 0012 3.25z" /></svg>');
+        .theme-switcher input:checked + .slider:before { transform: translateX(24px); background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231a1d24"><path d="M21.75 12.016a9.72 9.72 0 01-9.72 9.72A9.72 9.72 0 012.25 12.016a9.72 9.72 0 019.72-9.72 9.72 9.72 0 019.78 9.72zM12 3.25A8.75 8.75 0 1012 20.75 8.75 8.75 0 0012 3.25z" /></svg>'); }
 
-        }
-
-        /* --- Sidebar Navigation --- */
         .logo { padding: 0 25px 20px 25px; border-bottom: 1px solid var(--border-color); }
-        .logo img { width: 100px; }
+        .logo img { width: 100px; transition: all var(--transition-speed) ease; }
         .nav-menu { list-style: none; padding: 20px 0; margin: 0; flex-grow: 1; }
-        .nav-menu li { 
-            padding: 15px 25px; cursor: pointer; font-size: 15px; color: var(--text-secondary); 
-            display: flex; align-items: center; transition: all 0.2s ease; border-left: 3px solid transparent; 
-        }
-        .nav-menu li.active, .nav-menu li:hover { 
-            background-color: rgba(0, 123, 255, 0.1); color: var(--text-primary); 
-            border-left-color: var(--accent-primary); 
-        }
-        .nav-menu li svg { margin-right: 15px; width: 20px; height: 20px; fill: currentColor; }
+        .nav-menu li { padding: 15px 25px; cursor: pointer; font-size: 15px; color: var(--text-secondary); display: flex; align-items: center; transition: all 0.2s ease; border-left: 3px solid transparent; overflow: hidden; white-space: nowrap; }
+        .nav-menu li.active, .nav-menu li:hover { background-color: rgba(0, 123, 255, 0.1); color: var(--text-primary); border-left-color: var(--accent-primary); }
+        .nav-menu li svg { margin-right: 15px; width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
+        .nav-menu li span { transition: opacity var(--transition-speed) ease; }
         .nav-menu li.specialist-only, .nav-menu li.employee-only { display: none; }
 
-        /* --- Main Content Area --- */
-        .page { display: none; padding: 30px 40px; }
+        .page { display: none; padding: 30px 40px; transition: padding var(--transition-speed) ease; }
         .page.active { display: block; animation: fadeIn 0.5s; }
-        .page h1 { font-size: 28px; font-weight: 500; color: var(--text-primary); margin-top: 0; margin-bottom: 25px; }
+        .page h1 { font-size: 28px; font-weight: 500; color: var(--text-primary); margin-top: 0; margin-bottom: 25px; transition: font-size var(--transition-speed) ease; }
         .page p { color: var(--text-secondary); line-height: 1.6; }
 
-        /* --- UI Components --- */
-        .card { 
-            background: var(--bg-light); padding: 25px; border-radius: 8px; 
-            border: 1px solid var(--border-color); margin-bottom: 25px;
-            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
-        }
+        .card { background: var(--bg-light); padding: 25px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 25px; transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease; }
         body.light-mode .card { box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color); }
-        
-        .card-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); 
-        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); }
         .card-header h2 { margin: 0; font-size: 18px; font-weight: 500; color: var(--text-primary); }
         .page-actions { margin-bottom: 25px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .page-actions .filters { display: flex; gap: 15px; align-items: center; flex-grow: 1;}
+        .page-actions .filters { display: flex; gap: 15px; align-items: center; flex-grow: 1; flex-wrap: wrap;}
         .page-actions .filters .filter-group { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
-        .page-actions .action-buttons { display: flex; gap: 10px; }
+        .page-actions .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         
-        input, select, .form-group textarea {
-            background-color: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary);
-            padding: 10px 15px; font-size: 14px; border-radius: 6px; 
-            transition: all var(--transition-speed) ease;
-            box-sizing: border-box; width: 100%;
-        }
+        input, select, .form-group textarea { background-color: var(--bg-dark); border: 1px solid var(--border-color); color: var(--text-primary); padding: 10px 15px; font-size: 14px; border-radius: 6px; transition: all var(--transition-speed) ease; box-sizing: border-box; width: 100%; }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: var(--bg-dark) > #fff ? invert(1) : invert(0); cursor: pointer; }
         body.light-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0); }
         body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none; border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); }
 
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        td { padding: 15px; text-align: left; vertical-align: middle; color: var(--text-secondary); }
-        th { 
-            padding: 15px; text-align: left; background-color: transparent; 
-            font-weight: 500; color: var(--text-primary); border-bottom: 2px solid var(--border-color);
-        }
+        td, th { padding: 15px; text-align: left; vertical-align: middle; }
+        td { color: var(--text-secondary); }
+        th { font-weight: 500; color: var(--text-primary); border-bottom: 2px solid var(--border-color); }
         tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease;}
         tbody tr:last-child { border-bottom: none; }
-        tbody tr:not(.no-hover) { cursor: pointer; }
-        tbody tr:not(.no-hover):hover { background-color: rgba(0, 123, 255, 0.05); }
+        tbody tr:not(.no-hover, .sub-row) { cursor: pointer; }
+        tbody tr:not(.no-hover, .sub-row):hover { background-color: rgba(0, 123, 255, 0.05); }
         
-        .status { 
-            padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 500; 
-            display: inline-block; white-space: nowrap; border: 1px solid;
-            background-color: var(--status-pending-bg); color: var(--status-pending-text);
-            border-color: var(--status-pending-text);
-        }
-        .status-approved { background-color: var(--status-approved-bg); color: var(--status-approved-text); border-color: var(--status-approved-text);}
-        .status-rejected { background-color: var(--status-rejected-bg); color: var(--status-rejected-text); border-color: var(--status-rejected-text);}
+        /* Sub-row styles */
+        .sub-row { display: none; }
+        .sub-row.visible { display: table-row; animation: fadeIn 0.4s; }
+        .sub-row > td { background-color: var(--bg-dark); padding: 20px 30px; box-shadow: inset 0 6px 6px -6px var(--shadow-color); }
+        .sub-row-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .sub-row-content h4 { grid-column: 1 / -1; margin-top: 0; color: var(--accent-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; font-weight: 500;}
+        .sub-row-content h5 { font-size: 14px; color: var(--text-primary); margin-top: 0; margin-bottom: 10px; }
+        .sub-row-content p { margin: 0 0 8px 0; color: var(--text-secondary); }
+        .sub-row-content p strong { color: var(--text-primary); min-width: 80px; display: inline-block; }
+        .main-row.parent-row-active { background-color: rgba(0, 123, 255, 0.1); }
+        .main-row .arrow-icon { display: inline-block; transition: transform 0.3s ease; margin-left: 8px; font-size: 12px; }
+        .main-row.parent-row-active .arrow-icon { transform: rotate(90deg); }
+        .change-old { color: var(--change-old-text); text-decoration: line-through; }
+        .change-new { color: var(--change-new-text); font-weight: bold; }
+        .change-item { margin-bottom: 5px; }
+
+
+        .status { padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 500; display: inline-block; white-space: nowrap; border: 1px solid; }
+        .status-unconfirmed { background-color: var(--status-unconfirmed-bg); color: var(--status-unconfirmed-text); border-color: var(--status-unconfirmed-text); }
+        .status-confirmed { background-color: var(--status-confirmed-bg); color: var(--status-confirmed-text); border-color: var(--status-confirmed-text);}
+        .status-abnormal { background-color: var(--status-abnormal-bg); color: var(--status-abnormal-text); border-color: var(--status-abnormal-text);}
         .status-modification { background-color: var(--status-modification-bg); color: var(--status-modification-text); border-color: var(--status-modification-text);}
         
-        .btn { 
-            padding: 10px 20px; border: 1px solid transparent; border-radius: 6px; 
-            cursor: pointer; font-size: 14px; font-weight: 500;
-            transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; 
-        }
+        .btn { padding: 10px 20px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 8px; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px var(--shadow-color); }
         .btn:active { transform: translateY(0); }
         .btn-primary { background-color: var(--accent-primary); color: white; border-color: var(--accent-primary); }
@@ -205,64 +153,67 @@
         .btn-outline:hover { background-color: var(--accent-primary); color: white; border-color: var(--accent-primary);}
         .btn-sm { padding: 5px 12px; font-size: 12px; }
 
-        /* --- Modal Styles --- */
-        .modal { 
-            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; 
-            overflow: auto; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); animation: fadeIn 0.3s; 
-        }
-        .modal-content { 
-            background-color: var(--bg-light); margin: 8% auto; padding: 30px; 
-            border: 1px solid var(--border-color); width: 60%; max-width: 800px; 
-            border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideIn 0.4s;
-            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
-        }
+        .tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+        .tab-link { padding: 10px 20px; cursor: pointer; color: var(--text-secondary); border-bottom: 3px solid transparent; margin-bottom: -1px; transition: all 0.2s ease; }
+        .tab-link.active { color: var(--accent-primary); border-bottom-color: var(--accent-primary); font-weight: 500; }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
+        .modal-content { background-color: var(--bg-light); margin: 8% auto; padding: 30px; border: 1px solid var(--border-color); width: 60%; max-width: 800px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideIn 0.4s; transition: all var(--transition-speed) ease; }
         body.light-mode .modal { background-color: rgba(255, 255, 255, 0.5); }
-        .modal-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; 
-        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 25px; }
         .modal-header h2 { margin: 0; font-size: 22px; color: var(--text-primary);}
         .close-btn { color: var(--text-secondary); font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
         .close-btn:hover { color: var(--text-primary); }
         .modal-body { max-height: 60vh; overflow-y: auto; padding-right: 15px;}
         .modal-footer { padding-top: 25px; margin-top: 25px; border-top: 1px solid var(--border-color); text-align: right; }
         .modal-footer .btn { margin-left: 10px; }
-        
         .form-group, .detail-group { margin-bottom: 20px; }
         .form-group label, .detail-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); font-size: 14px;}
-        .detail-group p { 
-            margin: 0; padding: 12px 15px; background: var(--bg-dark); border-radius: 6px; 
-            min-height: 21px; font-size: 14px; line-height: 1.5; border: 1px solid var(--border-color); 
-        }
-        
+        .detail-group p { margin: 0; padding: 12px 15px; background: var(--bg-dark); border-radius: 6px; min-height: 21px; font-size: 14px; line-height: 1.5; border: 1px solid var(--border-color); }
         .allocation-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .allocation-row input { width: 80px !important; }
         .allocation-row .total { margin-left: auto; font-weight: bold; }
         .remove-employee-btn { background: none; border: none; color: var(--hitachi-red); cursor: pointer; font-weight: bold; font-size: 20px; padding: 0 5px; transition: color 0.2s;}
         
-        .comparison-view { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 15px; 
-            background: var(--bg-dark); border-radius: 8px; border: 1px solid var(--border-color); 
-        }
-        .comparison-view h4 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; color: var(--text-secondary); }
-        .comparison-view .old { color: var(--text-secondary); }
-        .comparison-view .old span { text-decoration: line-through; }
-        .comparison-view .new { color: var(--accent-primary); font-weight: bold; }
-        
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
         @keyframes slideIn { from {transform: translateY(-50px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+
+        /* --- MOBILE VIEW STYLES --- */
+        body.mobile-view .sidebar { width: 65px; }
+        body.mobile-view .sidebar .logo img { width: 35px; margin: 0 auto; display: block; }
+        body.mobile-view .sidebar .nav-menu li { padding-left: 22px; }
+        body.mobile-view .sidebar .nav-menu li span { opacity: 0; width: 0; }
+        body.mobile-view .header { padding: 10px 15px; }
+        body.mobile-view .header .user-info { gap: 10px; flex-wrap: wrap; justify-content: flex-end;}
+        body.mobile-view .page { padding: 15px 20px; }
+        body.mobile-view .page h1 { font-size: 22px; }
+        body.mobile-view .page-actions, body.mobile-view .page-actions .filters { flex-direction: column; align-items: stretch; gap: 10px; }
+        body.mobile-view .page-actions .action-buttons { justify-content: flex-start; }
+        body.mobile-view .filter-group, body.mobile-view .filter-group input, body.mobile-view .filter-group select { width: 100%; box-sizing: border-box; }
+        body.mobile-view .modal-content { width: 95%; max-width: 95%; margin: 5% auto; padding: 20px; }
+        body.mobile-view table { border: 0; }
+        body.mobile-view table thead { display: none; }
+        body.mobile-view table tr:not(.sub-row) { display: block; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 15px; background-color: var(--bg-dark); }
+        body.mobile-view tr.sub-row { display: none; border: 1px solid var(--border-color); border-top: 0; margin-bottom: 15px; border-top-left-radius: 0; border-top-right-radius: 0; }
+        body.mobile-view tr.sub-row.visible { display: block; }
+        body.mobile-view table td { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; text-align: right; border-bottom: 1px solid var(--border-color); }
+        body.mobile-view table tr:not(.sub-row) td:last-child { border-bottom: 0; }
+        body.mobile-view table td::before { content: attr(data-label); font-weight: 500; color: var(--text-primary); text-align: left; margin-right: 15px; }
+        body.mobile-view table td:has(input[type="checkbox"]) { padding: 10px 0; border: 0; justify-content: flex-end; }
+        body.mobile-view table td:has(input[type="checkbox"])::before { content: none; }
+        body.mobile-view .sub-row-content { grid-template-columns: 1fr; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="sidebar">
-            <div class="logo"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMzUiPjxwYXRoIGZpbGw9IiNFNjAwMTIiIGQ9Ik0xMy4zIDM0LjFoNy40di05LjZoLTMuN2wtMi4xIDUuMy0yLjEtNS4zaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJ6bTguMS0xMy45aDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTAuMiAxMy45aDQuM3YtMTguNWgtNC4zdjE4LjV6bTkuOCAwdi0xMy45aDkuNHYtNC42aC0xMy43djE4LjVoNC4zem0xMS4yLTE4LjVoNC4zdjEzLjloNC4zdi0xOC41aC0xM3Y0LjZoNC40em0yMS4yIDkuNmgtMy43bC0yLjEgNS4zLTIuMS01LjzaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJoMy45bDIuMS01LjJ2NC41aDQuMnYtOS42aC0zLjd6bTguMS05LjZoNC4zdjE4LjVoLTQuM3YtMTh6bTkuMiAwaDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTMuMSAwYzIuNCAwIDQuMyAxLjkgNC4zIDQuM3MtMS45IDQuMy00LjIgNC4zaC00LjJ2NS4zaDQuMnY0LjZoLTguNXYtMThoNC4zem0wIDQuNmgtMy44YzEuNyAwIDIuOC0xLjEgMi44LTIuOHMtMS4xLTIuNy0yLjgtMi43aC0uM3Y1LjV6Ii8+PC9zdmc+" alt="HITACHI Logo"></div>
+            <div class="logo"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMzUiPjxwYXRoIGZpbGw9IiNFNjAwMTIiIGQ9Ik0xMy4zIDM0LjFoNy40di05LjZoLTMuN2wtMi4xIDUuMy0yLjEtNS4zaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJ6bTguMS0xMy45aDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTAuMiAxMy45aDQuM3YtMTguNWgtNC4zdjE4LjV6bTkuOCAwdi0xMy45aDkuNHYtNC42aC0xMy43djE4LjVoNC4zem0xMS4yLTE4LjVoNC4zdjEzLjloNC4zdi0xOC41aC0xM3Y0LjZoNC40em0yMS4yIDkuNmgtMy43bC0yLjEgNS4zLTIuMS01LjzaC0zLjh2OS42aDQuMnYtNC41bDIuMSA1LjJoMy45bDIuMS01LjJ2NC41aDQuMnYtOS42aC0zLjd6bTguMS05LjZoNC4zdjE4LjVoLTQuM3YtMTh6bTkuMiAwaDQuM3YxMy45aDQuM3YtMTguNWgtMTN2NC42aDQuNHptMTMuMSAwYzIuNCAwIDQuMyAxLjkgNC4zIDQuM3MtMS45IDQuMy00LjyNC4zaC00LjJ2NS4zaDQuMnY0LjZoLTguNXYtMThoNC4zem0wIDQuNmgtMy44YzEuNyAwIDIuOC0xLjEgMi44LTIuOHMtMS4xLTIuNy0yLjgtMi43aC0uM3Y1LjV6Ii8+PC9zdmc+" alt="HITACHI Logo"></div>
             <ul class="nav-menu">
-                <li class="active" data-page="home"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>首页</li>
-                <li data-page="allocation"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path></svg>业务分配与确认</li>
-                <li data-page="modification-processing"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg>修改申请追踪</li>
-                <li data-page="employee-requests-approval" class="specialist-only"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 15H5V5h14v14zM12 16l-4-4h8l-4 4z"></path></svg>员工申请审批</li>
+                <li class="active" data-page="home" title="首页"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg><span>首页</span></li>
+                <li data-page="allocation" title="业务分配与确认"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path></svg><span>业务分配与确认</span></li>
+                <li data-page="modification-processing" title="修改申请追踪"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"></path></svg><span>修改申请追踪</span></li>
+                <li data-page="employee-requests-approval" class="specialist-only" title="员工申请审批"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 15H5V5h14v14zM12 16l-4-4h8l-4 4z"></path></svg><span>员工申请审批</span></li>
              </ul>
         </div>
 
@@ -270,41 +221,46 @@
             <div class="header">
                  <div></div>
                 <div class="user-info">
+                    <div class="view-mode-switcher" id="view-mode-toggle" title="切换视图">
+                        <svg id="mobile-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"></path></svg>
+                        <svg id="desktop-icon" class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"></path></svg>
+                    </div>
                     <label class="theme-switcher">
                         <input type="checkbox" id="theme-toggle">
                         <span class="slider"></span>
                     </label>
                     <div class="role-area">
-                        切换角色: 
                         <select id="role-switcher" class="role-switcher">
                             <option value="specialist">核算专员</option>
-                            <option value="employee" selected>普通员工 (张三)</option>
+                            <option value="employee_E001" selected>普通员工 (张三)</option>
+                            <option value="employee_E002">普通员工 (李四)</option>
                         </select>
                     </div>
-                    <span>你好, <span id="user-name"></span></span>
+                    <span><span id="user-name"></span></span>
                 </div>
             </div>
-            <div id="page-home" class="page active"><h1>欢迎来到提成工资管理平台</h1><p>这是一个为现代化工作流程设计的功能原型。您可以使用右上角的角色切换器来体验核算专员和普通员工的不同操作视角和权限。</p></div>
+            <div id="page-home" class="page active"><h1>欢迎来到提成工资管理平台</h1><p>这是一个为现代化工作流程设计的功能原型。您可以使用右上角的角色切换器来体验核算专员和普通员工的不同操作视角和权限。新增的视图切换按钮可以模拟手机端浏览效果。</p></div>
             <div id="page-allocation" class="page">
                 <h1>业务分配与确认</h1>
+                <div id="allocation-tabs-container"></div>
                 <div class="page-actions" id="allocation-page-actions"></div>
                 <div class="card">
-                    <div class="card-header"><h2>业务列表 (点击条目查看详情或修改)</h2></div>
-                    <table id="allocation-table"><thead><tr><th>合同号/工号</th><th>项目名称</th><th>分配方案</th><th>状态</th></tr></thead><tbody></tbody></table>
+                    <div class="card-header"><h2 id="allocation-table-title">业务列表</h2></div>
+                    <table id="allocation-table"><thead></thead><tbody></tbody></table>
                 </div>
             </div>
             <div id="page-modification-processing" class="page">
                 <h1>修改申请追踪</h1>
                 <div class="card">
                     <div class="card-header"><h2 id="modification-page-title">我提交的修改申请</h2></div>
-                    <table id="modification-table"><thead><tr><th>申请ID</th><th>相关合同号</th><th>申请类型</th><th>申请日期</th><th>审批状态</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <table id="modification-table"><thead></thead><tbody></tbody></table>
                 </div>
             </div>
             <div id="page-employee-requests-approval" class="page">
                 <h1>员工申请审批</h1>
                 <div class="card">
                     <div class="card-header"><h2>待我审批的员工修改申请</h2></div>
-                    <table id="employee-approval-table"><thead><tr><th>申请ID</th><th>合同号</th><th>申请人</th><th>申请内容</th><th>原内容</th><th>新内容</th><th>操作</th></tr></thead><tbody></tbody></table>
+                    <table id="employee-approval-table"><thead></thead><tbody></tbody></table>
                 </div>
             </div>
         </div>
@@ -318,87 +274,159 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     
-    // --- DATA (Unchanged) ---
+    // --- STATE MANAGEMENT ---
     let currentUserRole = 'employee'; 
     let activeUser = { id: 'E001', name: '张三' };
     let activeItemId = null;
-    const employees = [
-        { id: 'E001', name: '张三' }, { id: 'E002', name: '李四' }, { id: 'E003', name: '王五' }, 
-        { id: 'E004', name: '赵六' }, { id: 'E005', name: '孙七' }, { id: 'E006', name: '周八' }
-    ];
+    let specialistActiveTab = 'unconfirmed';
+
+    // --- DATA ---
+    const employees = [ { id: 'E001', name: '张三' }, { id: 'E002', name: '李四' }, { id: 'E003', name: '王五' }, { id: 'E004', name: '赵六' }, { id: 'E005', name: '孙七' }, { id: 'E006', name: '周八' } ];
     let businessData = [
-        { id: 1, contractId: 'HT2025-07-001', project: '大型商场电梯维保', amount: 50000, client: '环球购物中心', status: 'pending_allocation', finalAllocation: [], maintenanceDate: '2025-07-20', contractEffectiveDate: '2025-07-01' },
-        { id: 2, contractId: 'HT2025-07-002', project: '医院紧急维修', amount: 15000, client: '市第一人民医院', status: 'pending_allocation', finalAllocation: [], maintenanceDate: '2025-07-22', contractEffectiveDate: '2025-07-05'},
-        { id: 3, contractId: 'HT2025-06-113', project: 'A栋写字楼季度保养', amount: 30000, client: '万科地产', status: 'pending_confirmation', finalAllocation: [{ employee: '张三', ratio: 80, confirmed: false }, { employee: '李四', ratio: 20, confirmed: false }], maintenanceDate: '2025-06-25', contractEffectiveDate: '2025-06-01'},
-        { id: 4, contractId: 'HT2025-06-105', project: 'B座公寓电梯更换', amount: 180000, client: '绿地集团', status: 'approved', finalAllocation: [{ employee: '张三', ratio: 50, confirmed: true }, { employee: '王五', ratio: 50, confirmed: true }], maintenanceDate: '2025-06-15', contractEffectiveDate: '2025-05-10'},
-        { id: 5, contractId: 'HT2025-06-108', project: 'C栋电梯大修', amount: 95000, client: '华润置地', status: 'modification_pending', finalAllocation: [{ employee: '李四', ratio: 100, confirmed: true }], maintenanceDate: '2025-06-18', contractEffectiveDate: '2025-05-15'},
-        { id: 6, contractId: 'HT2025-05-080', project: 'D栋办公楼例行检查', amount: 8000, client: '金地物业', status: 'approved', finalAllocation: [{ employee: '赵六', ratio: 100, confirmed: true }], maintenanceDate: '2025-05-20', contractEffectiveDate: '2025-05-01'},
-        { id: 7, contractId: 'HT2025-05-091', project: 'E小区电梯新增', amount: 250000, client: '保利地产', status: 'modification_pending', finalAllocation: [{ employee: '张三', ratio: 40, confirmed: true }, { employee: '王五', ratio: 60, confirmed: true }], maintenanceDate: '2025-05-30', contractEffectiveDate: '2025-04-20'},
-        { id: 8, contractId: 'GZ2025-07-031', project: 'F大厦扶梯维修', amount: 42000, client: '银泰商业', status: 'pending_confirmation', finalAllocation: [{ employee: '李四', ratio: 50, confirmed: false }, { employee: '赵六', ratio: 50, confirmed: false }], maintenanceDate: '2025-07-15', contractEffectiveDate: '2025-07-02'},
+        { id: 1, contractId: 'HT2025-07-001', project: '大型商场电梯维保', amount: 50000, client: '环球购物中心', status: 'abnormal', finalAllocation: [], maintenanceDate: '2025-07-20', contractEffectiveDate: '2025-07-01' },
+        { id: 2, contractId: 'HT2025-07-002', project: '医院紧急维修', amount: 15000, client: '市第一人民医院', status: 'unconfirmed', finalAllocation: [{ employee: '周八', ratio: 100 }], maintenanceDate: '2025-07-22', contractEffectiveDate: '2025-07-05'},
+        { id: 3, contractId: 'HT2025-06-113', project: 'A栋写字楼季度保养', amount: 30000, client: '万科地产', status: 'modification_pending', finalAllocation: [{ employee: '张三', ratio: 80 }, { employee: '李四', ratio: 20 }], maintenanceDate: '2025-06-25', contractEffectiveDate: '2025-06-01'},
+        { id: 4, contractId: 'HT2025-06-105', project: 'B座公寓电梯更换', amount: 180000, client: '绿地集团', status: 'confirmed', finalAllocation: [{ employee: '张三', ratio: 50 }, { employee: '王五', ratio: 50 }], maintenanceDate: '2025-06-15', contractEffectiveDate: '2025-05-10'},
+        { id: 5, contractId: 'HT2025-06-108', project: 'C栋电梯大修', amount: 95000, client: '华润置地', status: 'modification_pending', finalAllocation: [{ employee: '李四', ratio: 100 }], maintenanceDate: '2025-06-18', contractEffectiveDate: '2025-05-15'},
+        { id: 6, contractId: 'HT2025-05-080', project: 'D栋办公楼例行检查', amount: 8000, client: '金地物业', status: 'confirmed', finalAllocation: [{ employee: '赵六', ratio: 100 }], maintenanceDate: '2025-05-20', contractEffectiveDate: '2025-05-01'},
+        { id: 7, contractId: 'HT2025-05-091', project: 'E小区电梯新增', amount: 250000, client: '保利地产', status: 'modification_pending', finalAllocation: [{ employee: '张三', ratio: 40 }, { employee: '王五', ratio: 60 }], maintenanceDate: '2025-05-30', contractEffectiveDate: '2025-04-20'},
+        { id: 8, contractId: 'GZ2025-07-031', project: 'F大厦扶梯维修', amount: 42000, client: '银泰商业', status: 'unconfirmed', finalAllocation: [{ employee: '李四', ratio: 50 }, { employee: '赵六', ratio: 50 }], maintenanceDate: '2025-07-15', contractEffectiveDate: '2025-07-02'},
         { id: 9, contractId: 'GZ2025-07-035', project: 'G酒店客梯保养', amount: 28000, client: '希尔顿酒店', status: 'modification_pending', finalAllocation: [], maintenanceDate: '2025-07-18', contractEffectiveDate: '2025-06-15' }
     ];
+    // --- MODIFIED: Enriched mock data ---
     let modificationRequests = [
-        { id: 'MOD-001', businessId: 5, contractId: 'HT2025-06-108', timestamp: '2025/07/15', approvalStatus: 'pending', type: 'specialist_rewrite', submitter: {name: '核算专员'}, details: { old: [{ employee: '李四', ratio: 100 }], new: [{ employee: '李四', ratio: 70 }, { employee: '赵六', ratio: 30 }] }},
-        { id: 'MOD-002', businessId: 7, contractId: 'HT2025-05-091', timestamp: '2025/07/16', approvalStatus: 'pending', type: 'employee_suggestion', submitter: {name: '张三'}, details: { from: 40, to: 45 } },
-        { id: 'MOD-003', businessId: 4, contractId: 'HT2025-06-105', timestamp: '2025/07/14', approvalStatus: 'approved', type: 'employee_suggestion', submitter: {name: '王五'}, details: { from: 40, to: 50 } },
-        { id: 'MOD-004', businessId: 3, contractId: 'HT2025-06-113', timestamp: '2025/07/13', approvalStatus: 'rejected', type: 'employee_suggestion', submitter: {name: '李四'}, details: { from: 20, to: 25 } },
-        { id: 'MOD-005', businessId: 9, contractId: 'GZ2025-07-035', timestamp: '2025/07/19', approvalStatus: 'pending', type: 'employee_join_request', submitter: {name: '孙七'}, details: { to: 100 } },
+        { id: 'MOD-001', businessId: 5, contractId: 'HT2025-06-108', timestamp: '2025-07-15', approvalStatus: 'pending', type: 'specialist_rewrite', submitter: {name: '核算专员'}, details: { old: [{ employee: '李四', ratio: 100 }], new: [{ employee: '李四', ratio: 70 }, { employee: '赵六', ratio: 30 }] }},
+        { id: 'MOD-002', businessId: 7, contractId: 'HT2025-05-091', timestamp: '2025-07-16', approvalStatus: 'pending', type: 'employee_suggestion', submitter: {name: '张三'}, details: { from: 40, to: 45 } },
+        { id: 'MOD-003', businessId: 4, contractId: 'HT2025-06-105', timestamp: '2025-07-14', approvalStatus: 'approved', type: 'employee_suggestion', submitter: {name: '王五'}, details: { from: 40, to: 50 } },
+        { id: 'MOD-004', businessId: 3, contractId: 'HT2025-06-113', timestamp: '2025-07-13', approvalStatus: 'rejected', type: 'specialist_rewrite', submitter: {name: '核算专员'}, details: { old: [{ employee: '张三', ratio: 80 }, { employee: '李四', ratio: 20 }], new: [{ employee: '张三', ratio: 0 }, { employee: '李四', ratio: 50 }, { employee: '孙七', ratio: 50 }] }},
+        { id: 'MOD-005', businessId: 9, contractId: 'GZ2025-07-035', timestamp: '2025-07-19', approvalStatus: 'pending', type: 'employee_join_request', submitter: {name: '孙七'}, details: { to: 100 } },
+        { id: 'MOD-006', businessId: 2, contractId: 'HT2025-07-002', timestamp: '2025-07-23', approvalStatus: 'pending', type: 'business_info_update', submitter: {name: '核算专员'}, details: { old: { amount: 15000, client: '市第一人民医院'}, new: { amount: 18500, client: '市第一人民医院急诊部'} } }
     ];
 
-    // --- RENDER FUNCTIONS (Unchanged) ---
+    // --- RENDER FUNCTIONS ---
     const getStatusBadge = (status) => {
-        const statuses = { 'pending_allocation': '<span class="status status-pending">待分配比例</span>', 'pending_verification': '<span class="status status-verification">待专员核实</span>', 'pending_confirmation': '<span class="status status-pending">待员工确认</span>', 'approved': '<span class="status status-approved">已审批</span>', 'modification_pending': '<span class="status status-modification">修改待审批</span>' };
+        const statuses = { 'unconfirmed': '<span class="status status-unconfirmed">未确认</span>', 'confirmed': '<span class="status status-confirmed">已确认</span>', 'abnormal': '<span class="status status-abnormal">异常</span>', 'modification_pending': '<span class="status status-modification">修改待审批</span>' };
         return statuses[status] || status;
     };
     const formatAllocation = (allocation) => (!allocation || allocation.length === 0) ? '未分配' : allocation.map(a => `${a.employee}: ${a.ratio}%`).join('; ');
     
     function renderAllocationTable() {
         const actionsDiv = document.getElementById('allocation-page-actions');
+        const tabsContainer = document.getElementById('allocation-tabs-container');
+        const tableTitle = document.getElementById('allocation-table-title');
+        const thead = document.getElementById('allocation-table').querySelector('thead');
+        const tbody = document.getElementById('allocation-table').querySelector('tbody');
+        let headers = [];
+        tbody.innerHTML = ''; thead.innerHTML = ''; actionsDiv.innerHTML = ''; tabsContainer.innerHTML = '';
+
+        let dataToRender = [];
+
         if (currentUserRole === 'employee') {
+            tableTitle.textContent = "我的业务列表";
             actionsDiv.innerHTML = `<div class="action-buttons"><button class="btn btn-primary" onclick="openAddMissingBusinessModal()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>补充遗漏业务</button></div>`;
-        } else {
-            actionsDiv.innerHTML = `
-                <div class="filters">
-                    <div class="filter-group"><label for="filter-maintenance-date">保养作业时间:</label><input type="date" id="filter-maintenance-date"></div>
-                    <div class="filter-group"><label for="filter-effective-date">合同生效时间:</label><input type="date" id="filter-effective-date"></div>
-                    <button class="btn btn-outline btn-sm" onclick="applyFilters()">筛选</button>
-                    <button class="btn btn-outline btn-sm" onclick="clearFilters()">清空筛选</button>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>导出数据</button>
-                    <button class="btn btn-secondary" onclick="alert('导入功能正在开发中。')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" transform="rotate(180 12 12)"></path></svg>导入数据</button>
-                </div>
-            `;
+            headers = ['合同号/工号', '项目名称', '我的提成比例', '分配方案', '状态', '操作'];
+            thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            dataToRender = businessData.filter(item => item.finalAllocation.some(a => a.employee === activeUser.name));
+        } else { // Specialist View
+            tabsContainer.innerHTML = `<div class="tabs"><span class="tab-link ${specialistActiveTab === 'unconfirmed' ? 'active' : ''}" onclick="switchSpecialistTab('unconfirmed')">未确认</span><span class="tab-link ${specialistActiveTab === 'confirmed' ? 'active' : ''}" onclick="switchSpecialistTab('confirmed')">已确认</span></div>`;
+
+            if (specialistActiveTab === 'unconfirmed') {
+                tableTitle.textContent = "待处理业务列表 (点击条目修改)";
+                actionsDiv.innerHTML = `
+                    <div class="filters">
+                        <div class="filter-group"><label for="filter-maintenance-date">保养作业时间:</label><input type="date" id="filter-maintenance-date"></div>
+                        <div class="filter-group"><label for="filter-effective-date">合同生效时间:</label><input type="date" id="filter-effective-date"></div>
+                        <div class="filter-group"><label for="filter-status">状态:</label>
+                          <select id="filter-status">
+                            <option value="">全部 (未确认)</option><option value="unconfirmed">未确认</option><option value="abnormal">异常</option><option value="modification_pending">修改待审批</option>
+                          </select>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="applyFilters()">筛选</button>
+                        <button class="btn btn-outline btn-sm" onclick="clearFilters()">清空筛选</button>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="batchConfirmItems()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>批量确认</button>
+                        <button class="btn btn-secondary" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>导出</button>
+                        <button class="btn btn-secondary" onclick="alert('导入功能正在开发中。')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7z" transform="rotate(180 12 12)"></path></svg>导入</button>
+                    </div>`;
+                headers = ['', '合同号/工号', '项目名称', '分配方案', '状态'];
+                thead.innerHTML = `<tr><th><input type="checkbox" onchange="toggleAllCheckboxes(this.checked)"></th><th>合同号/工号</th><th>项目名称</th><th>分配方案</th><th>状态</th></tr>`;
+                
+                const statusFilter = document.getElementById('filter-status')?.value;
+                const maintenanceDateFilter = document.getElementById('filter-maintenance-date')?.value;
+                const effectiveDateFilter = document.getElementById('filter-effective-date')?.value;
+                dataToRender = businessData.filter(item => {
+                    const isUnconfirmedGroup = ['unconfirmed', 'abnormal', 'modification_pending'].includes(item.status);
+                    if (!isUnconfirmedGroup) return false;
+                    const statusMatch = !statusFilter || item.status === statusFilter;
+                    const maintenanceMatch = !maintenanceDateFilter || item.maintenanceDate === maintenanceDateFilter;
+                    const effectiveMatch = !effectiveDateFilter || item.contractEffectiveDate === effectiveDateFilter;
+                    return statusMatch && maintenanceMatch && effectiveMatch;
+                });
+                setTimeout(() => document.getElementById('filter-status')?.addEventListener('change', renderAllocationTable), 0);
+
+            } else { // Confirmed Tab
+                tableTitle.textContent = "已确认业务列表 (点击查看详情)";
+                actionsDiv.innerHTML = `<div class="action-buttons"><button class="btn btn-secondary" onclick="exportData()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>导出数据</button></div>`;
+                headers = ['合同号/工号', '项目名称', '分配方案', '状态'];
+                thead.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+                dataToRender = businessData.filter(item => item.status === 'confirmed');
+            }
         }
 
-        const tbody = document.getElementById('allocation-table').querySelector('tbody');
-        tbody.innerHTML = '';
-        
-        const maintenanceDateFilter = document.getElementById('filter-maintenance-date')?.value;
-        const effectiveDateFilter = document.getElementById('filter-effective-date')?.value;
-        
-        const filteredData = businessData.filter(item => {
-            const maintenanceMatch = !maintenanceDateFilter || item.maintenanceDate === maintenanceDateFilter;
-            const effectiveMatch = !effectiveDateFilter || item.contractEffectiveDate === effectiveDateFilter;
-            return maintenanceMatch && effectiveMatch;
-        });
+        if (dataToRender.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${headers.length}" style="text-align:center; padding: 40px;">暂无数据。</td></tr>`;
+            return;
+        }
 
-        filteredData.forEach(item => {
+        dataToRender.forEach(item => {
             const tr = document.createElement('tr');
-            tr.onclick = () => openDetailsModal(item.id);
-            tr.innerHTML = `<td><span style="color: var(--text-primary); font-weight: 500;">${item.contractId}</span></td><td>${item.project}</td><td>${formatAllocation(item.finalAllocation)}</td><td>${getStatusBadge(item.status)}</td>`;
+            if (currentUserRole === 'specialist') {
+                tr.style.cursor = 'pointer';
+                tr.onclick = (e) => {
+                    if (e.target.type === 'checkbox' || e.target.closest('button')) return;
+                    openDetailsModal(item.id);
+                };
+                if (specialistActiveTab === 'unconfirmed') {
+                    tr.innerHTML = `
+                        <td data-label="${headers[0]}"><input type="checkbox" class="item-checkbox" data-id="${item.id}" onclick="event.stopPropagation();"></td>
+                        <td data-label="${headers[1]}"><span style="color: var(--text-primary); font-weight: 500;">${item.contractId}</span></td>
+                        <td data-label="${headers[2]}">${item.project}</td>
+                        <td data-label="${headers[3]}">${formatAllocation(item.finalAllocation)}</td>
+                        <td data-label="${headers[4]}">${getStatusBadge(item.status)}</td>`;
+                } else {
+                     tr.innerHTML = `
+                        <td data-label="${headers[0]}"><span style="color: var(--text-primary); font-weight: 500;">${item.contractId}</span></td>
+                        <td data-label="${headers[1]}">${item.project}</td>
+                        <td data-label="${headers[2]}">${formatAllocation(item.finalAllocation)}</td>
+                        <td data-label="${headers[3]}">${getStatusBadge(item.status)}</td>`;
+                }
+            } else {
+                tr.classList.add('no-hover');
+                const myAlloc = item.finalAllocation.find(a => a.employee === activeUser.name);
+                tr.innerHTML = `
+                    <td data-label="${headers[0]}"><span style="color: var(--text-primary); font-weight: 500;">${item.contractId}</span></td>
+                    <td data-label="${headers[1]}">${item.project}</td>
+                    <td data-label="${headers[2]}"><span style="font-weight: bold; color: var(--accent-primary);">${myAlloc ? myAlloc.ratio + '%' : 'N/A'}</span></td>
+                    <td data-label="${headers[3]}">${formatAllocation(item.finalAllocation)}</td>
+                    <td data-label="${headers[4]}">${getStatusBadge(item.status)}</td>
+                    <td data-label="${headers[5]}">
+                      <button class="btn btn-sm btn-outline" onclick="openDetailsModal(${item.id})">详情</button>
+                      <button class="btn btn-sm btn-primary" onclick="openModificationModalForEmployee(${item.id})">申请修改</button>
+                    </td>`;
+            }
             tbody.appendChild(tr);
         });
-        if (filteredData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 40px;">没有符合筛选条件的业务条目。</td></tr>';
-        }
     }
 
+    // --- MODIFIED: `renderModificationProcessingTable` now creates expandable rows with rich content ---
     function renderModificationProcessingTable() {
         const title = document.getElementById('modification-page-title');
         const tbody = document.getElementById('modification-table').querySelector('tbody');
+        const headers = ['申请ID', '相关合同号', '申请类型', '申请日期', '审批状态', '操作'];
+        document.getElementById('modification-table').querySelector('thead').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
         tbody.innerHTML = '';
-        
+
         let dataToRender = [];
         if (currentUserRole === 'specialist') {
             title.textContent = '全部修改申请追踪';
@@ -408,65 +436,179 @@ document.addEventListener('DOMContentLoaded', function() {
             dataToRender = modificationRequests.filter(req => req.submitter.name === activeUser.name);
         }
 
-        if (dataToRender.length > 0) {
-            dataToRender.forEach(req => {
-                const tr = document.createElement('tr');
-                tr.onclick = () => openModificationDetailsModal(req.id);
-                const approvalStatusBadges = { pending: '<span class="status status-pending">待审批</span>', approved: '<span class="status status-approved">已批准</span>', rejected: '<span class="status status-rejected">已驳回</span>' };
-                const requestTypes = { 'employee_suggestion': `员工建议 (${req.submitter.name})`, 'specialist_rewrite': '专员重分配', 'employee_join_request': `员工加入申请 (${req.submitter.name})` };
-                
-                const pushButton = (req.approvalStatus !== 'pending') ? `<button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); alert('已向相关人员推送关于 ${req.id} 的结果通知。')">推送通知</button>` : '—';
-                
-                tr.innerHTML = `<td><span style="color: var(--text-primary);">${req.id}</span></td><td>${req.contractId}</td><td>${requestTypes[req.type]}</td><td>${req.timestamp}</td><td>${approvalStatusBadges[req.approvalStatus]}</td><td>${pushButton}</td>`;
-                tbody.appendChild(tr);
-            });
-        } else {
-             tbody.innerHTML = '<tr class="no-hover"><td colspan="6" style="text-align:center; padding: 40px;">暂无相关记录。</td></tr>';
+        if (dataToRender.length === 0) {
+            tbody.innerHTML = '<tr class="no-hover"><td colspan="6" style="text-align:center; padding: 40px;">暂无相关记录。</td></tr>';
+            return;
         }
+
+        dataToRender.forEach(req => {
+            const approvalStatusBadges = { pending: '<span class="status status-unconfirmed">待审批</span>', approved: '<span class="status status-confirmed">已批准</span>', rejected: '<span class="status status-abnormal">已驳回</span>' };
+            const requestTypes = { 'employee_suggestion': `员工比例建议`, 'specialist_rewrite': '专员重分配', 'employee_join_request': `员工加入申请`, 'business_info_update': '核心业务信息修正'};
+            const requestTypeDesc = `${requestTypes[req.type]} (${req.submitter.name})`;
+            const pushButton = (req.approvalStatus !== 'pending') ? `<button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); alert('已向相关人员推送关于 ${req.id} 的结果通知。')">推送通知</button>` : '—';
+
+            const mainRow = document.createElement('tr');
+            mainRow.className = 'main-row no-hover';
+            mainRow.style.cursor = 'pointer';
+            mainRow.onclick = (e) => {
+                if(e.target.closest('button')) return;
+                toggleSubRow(req.id, mainRow);
+            };
+
+            mainRow.innerHTML = `
+                <td data-label="${headers[0]}"><span style="color: var(--text-primary);">${req.id}</span><span class="arrow-icon">▶</span></td>
+                <td data-label="${headers[1]}">${req.contractId}</td>
+                <td data-label="${headers[2]}">${requestTypeDesc}</td>
+                <td data-label="${headers[3]}">${req.timestamp}</td>
+                <td data-label="${headers[4]}">${approvalStatusBadges[req.approvalStatus]}</td>
+                <td data-label="${headers[5]}">${pushButton}</td>
+            `;
+            tbody.appendChild(mainRow);
+            
+            const subRow = document.createElement('tr');
+            subRow.className = 'sub-row';
+            subRow.id = `sub-row-${req.id}`;
+            subRow.innerHTML = `<td colspan="6">${buildSubRowContent(req)}</td>`;
+            tbody.appendChild(subRow);
+        });
+    }
+
+    // --- NEW: Builds rich HTML content for the sub-row ---
+    function buildSubRowContent(req) {
+        const businessItem = businessData.find(b => b.id === req.businessId);
+        let content = `<div class="sub-row-content">`;
+        
+        // --- Section 1: Basic Business Info ---
+        content += `
+            <div>
+                <h5>关联业务基础信息</h5>
+                ${businessItem ? `
+                    <p><strong>项目:</strong> ${businessItem.project}</p>
+                    <p><strong>客户:</strong> ${businessItem.client}</p>
+                    <p><strong>金额:</strong> ${businessItem.amount.toLocaleString()}</p>
+                ` : '<p>未找到关联业务。</p>'}
+            </div>
+        `;
+
+        // --- Section 2: Change Details ---
+        let changeDetailsHtml = '<div><h5>变更内容详情</h5>';
+        switch (req.type) {
+            case 'employee_suggestion':
+                changeDetailsHtml += `
+                    <div class="change-item">
+                        <strong>${req.submitter.name} 比例: </strong> 
+                        <span class="change-old">${req.details.from}%</span> → <span class="change-new">${req.details.to}%</span>
+                    </div>`;
+                break;
+
+            case 'business_info_update':
+                changeDetailsHtml += Object.keys(req.details.new).map(key => {
+                    if (req.details.old[key] !== req.details.new[key]) {
+                        return `<div class="change-item">
+                                    <strong>${{amount: '金额', client: '客户'}[key] || key}: </strong> 
+                                    <span class="change-old">${req.details.old[key]}</span> → <span class="change-new">${req.details.new[key]}</span>
+                                </div>`;
+                    }
+                    return '';
+                }).join('');
+                break;
+            
+            case 'specialist_rewrite':
+            case 'employee_join_request':
+                const oldAllocMap = new Map((req.details.old || []).map(item => [item.employee, item.ratio]));
+                const newAllocMap = new Map(req.details.new.map(item => [item.employee, item.ratio]));
+                const allNames = new Set([...oldAllocMap.keys(), ...newAllocMap.keys()]);
+
+                changeDetailsHtml += '<div><h5>变更前</h5>';
+                (req.details.old || []).forEach(a => { changeDetailsHtml += `<p>${a.employee}: ${a.ratio}%</p>`});
+                if ((req.details.old || []).length === 0) changeDetailsHtml += '<p>无</p>';
+                changeDetailsHtml += '</div><div><h5>变更后</h5>';
+                
+                allNames.forEach(name => {
+                    const oldRatio = oldAllocMap.get(name);
+                    const newRatio = newAllocMap.get(name);
+                    if (oldRatio === undefined && newRatio !== undefined) {
+                        // Added
+                        changeDetailsHtml += `<p class="change-new">+ ${name}: ${newRatio}%</p>`;
+                    } else if (oldRatio !== undefined && newRatio === undefined) {
+                        // Removed
+                        changeDetailsHtml += `<p class="change-old">- ${name}: ${oldRatio}%</p>`;
+                    } else if (oldRatio !== newRatio) {
+                        // Changed
+                        changeDetailsHtml += `<p>  ${name}: <span class="change-old">${oldRatio}%</span> → <span class="change-new">${newRatio}%</span></p>`;
+                    }
+                });
+                changeDetailsHtml += '</div>';
+                break;
+        }
+        changeDetailsHtml += '</div>';
+
+        content += changeDetailsHtml;
+        content += '</div>';
+        return content;
+    }
+
+    // --- NEW: Toggle Sub-Row visibility ---
+    window.toggleSubRow = function(reqId, clickedRow) {
+        const subRow = document.getElementById(`sub-row-${reqId}`);
+        if (!subRow) return;
+
+        const isCurrentlyVisible = subRow.classList.contains('visible');
+
+        document.querySelectorAll('.sub-row.visible').forEach(openSubRow => {
+            openSubRow.classList.remove('visible');
+            openSubRow.previousElementSibling.classList.remove('parent-row-active');
+        });
+
+        if (!isCurrentlyVisible) {
+            subRow.classList.add('visible');
+            clickedRow.classList.add('parent-row-active');
+        }
+    }
+    
+    function createTableRows(tbody, data, headers, rowGenerator) {
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+            tbody.innerHTML = `<tr class="no-hover"><td colspan="${headers.length}" style="text-align:center; padding: 40px;">暂无相关记录。</td></tr>`;
+            return;
+        }
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = rowGenerator(item);
+            tr.querySelectorAll('td').forEach((td, index) => {
+                if (headers[index]) td.setAttribute('data-label', headers[index]);
+            });
+            tbody.appendChild(tr);
+        });
     }
     
     function renderEmployeeRequestsApprovalTable() {
         const tbody = document.getElementById('employee-approval-table').querySelector('tbody');
-        tbody.innerHTML = '';
+        const headers = ['申请ID', '合同号', '申请人', '申请内容', '原内容', '新内容', '操作'];
+        document.getElementById('employee-approval-table').querySelector('thead').innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+        
         if (currentUserRole !== 'specialist') {
             tbody.innerHTML = '<tr class="no-hover"><td colspan="7" style="text-align:center; padding: 40px;">此页面仅核算专员可见。</td></tr>';
             return;
         }
-
+        
         const dataToRender = modificationRequests.filter(req => req.approvalStatus === 'pending');
 
-        if (dataToRender.length > 0) {
-            dataToRender.forEach(req => {
-                const tr = document.createElement('tr');
-                tr.classList.add('no-hover');
-                let originalContent = '', newContent = '', requestContent = '';
-                
-                switch(req.type) {
-                    case 'employee_suggestion':
-                        requestContent = '比例修改申请';
-                        originalContent = `${req.details.from}%`;
-                        newContent = `<span class="new">${req.details.to}%</span>`;
-                        break;
-                    case 'specialist_rewrite': 
-                         requestContent = '专员重分配';
-                         originalContent = formatAllocation(req.details.old);
-                         newContent = `<span class="new">${formatAllocation(req.details.new)}</span>`;
-                        break;
-                    case 'employee_join_request':
-                        requestContent = '新员工加入申请';
-                        originalContent = '未参与';
-                        newContent = `<span class="new">${req.submitter.name}: ${req.details.to}%</span>`;
-                        break;
-                }
-                tr.innerHTML = `<td><span style="color: var(--text-primary);">${req.id}</span></td><td>${req.contractId}</td><td>${req.submitter.name}</td><td>${requestContent}</td><td>${originalContent}</td><td>${newContent}</td><td><button class="btn btn-primary btn-sm" onclick="openModificationDetailsModal('${req.id}')">审批</button></td>`;
-                tbody.appendChild(tr);
-            });
-        } else {
-            tbody.innerHTML = '<tr class="no-hover"><td colspan="7" style="text-align:center; padding: 40px;">暂无待审批的员工申请。</td></tr>';
-        }
+        createTableRows(tbody, dataToRender, headers, (req) => {
+            let originalContent = '', newContent = '', requestContent = '';
+            switch(req.type) {
+                case 'employee_suggestion': requestContent = '比例修改申请'; originalContent = `${req.details.from}%`; newContent = `<span class="new">${req.details.to}%</span>`; break;
+                case 'specialist_rewrite': requestContent = '专员重分配'; originalContent = formatAllocation(req.details.old); newContent = `<span class="new">${formatAllocation(req.details.new)}</span>`; break;
+                case 'employee_join_request': requestContent = '新员工加入申请'; originalContent = '未参与'; newContent = `<span class="new">${req.submitter.name}: ${req.details.to}%</span>`; break;
+                case 'business_info_update': requestContent = '业务信息修正'; originalContent = `金额: ${req.details.old.amount}`; newContent = `<span class="new">金额: ${req.details.new.amount}</span>`; break;
+            }
+            const tr = document.createElement('tr');
+            tr.classList.add('no-hover');
+            tr.innerHTML = `<td><span style="color: var(--text-primary);">${req.id}</span></td><td>${req.contractId}</td><td>${req.submitter.name}</td><td>${requestContent}</td><td>${originalContent}</td><td>${newContent}</td><td><button class="btn btn-primary btn-sm" onclick="openModificationDetailsModal('${req.id}')">审批</button></td>`;
+            return tr.innerHTML;
+        });
     }
 
-    // --- MODAL & ACTION LOGIC (Unchanged) ---
     window.openDetailsModal = function(itemId) {
         activeItemId = itemId;
         const item = businessData.find(d => d.id === itemId);
@@ -481,148 +623,83 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="form-group"><label for="detail-client">客户</label><input type="text" id="detail-client" value="${item.client || ''}"></div>
                 <div class="form-group"><label for="detail-amount">金额</label><input type="number" id="detail-amount" value="${item.amount}"></div>
                 <div class="detail-group"><label>当前分配</label><p>${formatAllocation(item.finalAllocation)}</p></div>`;
-            footer.innerHTML = `
-                <button class="btn btn-outline" onclick="closeModal('details-modal')">取消</button>
-                <button class="btn btn-secondary" onclick="saveDetails(${item.id})">保存基础信息</button>
-                <button class="btn btn-primary" onclick="openAllocationModal(${item.id})">修改分配方案</button>`;
-        } else { 
+            footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">取消</button><button class="btn btn-secondary" onclick="saveDetails(${item.id})">保存基础信息</button><button class="btn btn-primary" onclick="openAllocationModal(${item.id})">修改分配方案</button>`;
+        } else {
             const myAlloc = item.finalAllocation.find(a => a.employee === activeUser.name);
             body.innerHTML = `
-                <div class="detail-group"><label>项目名称</label><p>${item.project}</p></div>
-                <div class="detail-group"><label>当前分配方案</label><p>${formatAllocation(item.finalAllocation)}</p></div>`;
-            
-            if (myAlloc) {
-                body.innerHTML += `<div class="form-group"><label for="employee-ratio-input">我的提成比例 (%)</label><input type="number" id="employee-ratio-input" value="${myAlloc.ratio}" ${item.status.includes('pending') ? '' : 'readonly'}></div>`;
-                footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button>`;
-                if (!item.status.includes('approved')) {
-                     footer.innerHTML += `<button class="btn btn-primary" onclick="submitRatioChangeSuggestion(${item.id})">提交修改建议</button>`;
-                }
-            } else if (item.status === 'pending_allocation') {
-                 body.innerHTML += `<div class="form-group"><label for="employee-join-ratio-input">我申请的提成比例 (%)</label><input type="number" id="employee-join-ratio-input" placeholder="填写您期望的比例"></div><p style="color: var(--text-secondary);"><small>提交后将由核算专员进行审批和最终分配。</small></p>`;
-                 footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button><button class="btn btn-primary" onclick="submitJoinRequest(${item.id})">提交参与申请</button>`;
-            } else {
-                body.innerHTML += `<p>您未参与此项业务。如有疑问请联系核算专员。</p>`;
-                footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('details-modal')">关闭</button>`;
-            }
+                <div class="detail-group"><label>项目名称</label><p>${item.project}</p></div><div class="detail-group"><label>客户</label><p>${item.client || 'N/A'}</p></div><div class="detail-group"><label>保养作业时间</label><p>${item.maintenanceDate}</p></div><div class="detail-group"><label>当前完整分配方案</label><p>${formatAllocation(item.finalAllocation)}</p></div><div class="detail-group"><label>我的提成比例</label><p style="font-weight: bold; color: var(--accent-primary);">${myAlloc ? myAlloc.ratio + '%' : 'N/A'}</p></div><div class="detail-group"><label>当前状态</label><p>${getStatusBadge(item.status)}</p></div>`;
+            footer.innerHTML = `<button class="btn btn-primary" onclick="closeModal('details-modal')">关闭</button>`;
         }
         modal.style.display = 'block';
     };
-
-    window.saveDetails = function(itemId) {
-        const item = businessData.find(d => d.id === itemId);
-        if (item) {
-            item.project = document.getElementById('detail-project').value.trim();
-            item.client = document.getElementById('detail-client').value.trim();
-            item.amount = Number(document.getElementById('detail-amount').value);
-            alert('基础信息已成功保存！');
-            closeModal('details-modal');
-            renderAll(); 
-        } else {
-            alert('错误：找不到要保存的项目。');
-        }
-    };
-
+    window.saveDetails = function(itemId) { const item = businessData.find(d => d.id === itemId); if (item) { item.project = document.getElementById('detail-project').value.trim(); item.client = document.getElementById('detail-client').value.trim(); item.amount = Number(document.getElementById('detail-amount').value); alert('基础信息已成功保存！'); closeModal('details-modal'); renderAll(); } else { alert('错误：找不到要保存的项目。'); } };
     window.openModificationDetailsModal = function(reqId) {
-        const req = modificationRequests.find(r => r.id === reqId);
-        const modal = document.getElementById('modification-details-modal');
-        const body = document.getElementById('mod-details-body');
-        const footer = document.getElementById('mod-details-footer');
-        
-        document.getElementById('mod-details-title').textContent = `申请详情: ${req.id}`;
-        let comparisonHtml = '';
-        switch(req.type) {
-            case 'employee_suggestion':
-                comparisonHtml = `<h4>员工 [${req.submitter.name}] 提议修改个人比例</h4><div class="comparison-view"><div><h4>修改前</h4><p class="old"><span>${req.details.from}%</span></p></div><div><h4>修改后</h4><p class="new">${req.details.to}%</p></div></div>`;
-                break;
-            case 'specialist_rewrite':
-                comparisonHtml = `<h4>专员重分配方案</h4><div class="comparison-view"><div><h4>修改前</h4><p class="old">${formatAllocation(req.details.old)}</p></div><div><h4>修改后</h4><p class="new">${formatAllocation(req.details.new)}</p></div></div>`;
-                break;
-            case 'employee_join_request':
-                 comparisonHtml = `<h4>员工 [${req.submitter.name}] 申请加入业务</h4><div class="comparison-view"><div><h4>修改前</h4><p class="old">未参与</p></div><div><h4>修改后 (申请比例)</h4><p class="new">${req.details.to}%</p></div></div>`;
-                break;
-        }
-        body.innerHTML = `<div class="detail-group"><label>合同号</label><p>${req.contractId}</p></div><div class="detail-group"><label>申请人</label><p>${req.submitter.name}</p></div>${comparisonHtml}`;
+        const req = modificationRequests.find(r => r.id === reqId); const modal = document.getElementById('modification-details-modal'); const body = document.getElementById('mod-details-body'); const footer = document.getElementById('mod-details-footer'); document.getElementById('mod-details-title').textContent = `申请详情: ${req.id}`; 
+        body.innerHTML = buildSubRowContent(req);
         footer.innerHTML = `<button class="btn btn-outline" onclick="closeModal('modification-details-modal')">关闭</button>`;
-        if (currentUserRole === 'specialist' && req.approvalStatus === 'pending') {
-            footer.innerHTML += `<button id="reject-modification-btn" class="btn btn-secondary" onclick="rejectModification('${reqId}')">驳回申请</button><button id="approve-modification-btn" class="btn btn-primary" onclick="approveModification('${reqId}')">批准修改</button>`;
-        }
+        if (currentUserRole === 'specialist' && req.approvalStatus === 'pending') { footer.innerHTML += `<button id="reject-modification-btn" class="btn btn-secondary" onclick="rejectModification('${reqId}')">驳回申请</button><button id="approve-modification-btn" class="btn btn-primary" onclick="approveModification('${reqId}')">批准修改</button>`; }
         modal.style.display = 'block';
     }
-
-    window.approveModification = function(reqId){ /* ... Unchanged ... */ };
-    window.rejectModification = function(reqId){ /* ... Unchanged ... */ };
-    window.submitRatioChangeSuggestion = function(itemId){ /* ... Unchanged ... */ };
-    window.submitJoinRequest = function(itemId){ /* ... Unchanged ... */ };
-    window.openAllocationModal = function(itemId){ /* ... Unchanged ... */ };
-    window.openAddMissingBusinessModal = () => document.getElementById('add-missing-business-modal').style.display = 'block';
-    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-    window.applyFilters = () => renderAllocationTable();
-    window.clearFilters = () => {
-        const mDate = document.getElementById('filter-maintenance-date');
-        const eDate = document.getElementById('filter-effective-date');
-        if (mDate) mDate.value = '';
-        if (eDate) eDate.value = '';
-        renderAllocationTable();
-    };
-    window.exportData = () => { /* ... Unchanged ... */ };
-    
-    // --- Re-pasting unchanged functions for completeness ---
     window.approveModification = function(reqId) {
         const req = modificationRequests.find(r => r.id === reqId); const item = businessData.find(b => b.id === req.businessId);
         switch(req.type) {
             case 'employee_suggestion': const employeeAlloc = item.finalAllocation.find(a => a.employee === req.submitter.name); if(employeeAlloc) employeeAlloc.ratio = req.details.to; break;
-            case 'specialist_rewrite': item.finalAllocation = req.details.new; break;
-            case 'employee_join_request': item.finalAllocation.push({ employee: req.submitter.name, ratio: req.details.to, confirmed: false}); break;
+            case 'specialist_rewrite': item.finalAllocation = req.details.new.map(a => ({...a})); break;
+            case 'employee_join_request': item.finalAllocation.push({ employee: req.submitter.name, ratio: req.details.to }); break;
+            case 'business_info_update': Object.assign(item, req.details.new); break;
         }
-        item.status = 'pending_confirmation'; item.finalAllocation.forEach(a => a.confirmed = false); req.approvalStatus = 'approved';
-        alert(`修改申请 ${req.id} 已批准，业务数据已更新。`); closeModal('modification-details-modal'); renderAll();
+        item.status = 'unconfirmed'; req.approvalStatus = 'approved'; alert(`修改申请 ${req.id} 已批准。该业务条目状态已更新为“未确认”，请在业务分配页面最终确认。`); closeModal('modification-details-modal'); renderAll();
     }
     window.rejectModification = function(reqId) {
         const req = modificationRequests.find(r => r.id === reqId); const item = businessData.find(b => b.id === req.businessId);
-        if (item.finalAllocation.length === 0) { item.status = 'pending_allocation'; } else { const wasAnythingConfirmed = item.finalAllocation.some(a => a.confirmed); item.status = wasAnythingConfirmed ? 'approved' : 'pending_confirmation'; }
+        if (item.finalAllocation.length === 0) { item.status = 'abnormal'; } else { item.status = 'unconfirmed';}
         req.approvalStatus = 'rejected'; alert(`修改申请 ${req.id} 已被驳回。`); closeModal('modification-details-modal'); renderAll();
     }
-    window.submitRatioChangeSuggestion = function(itemId) {
-        const item = businessData.find(d => d.id === itemId); const myOldAlloc = item.finalAllocation.find(a => a.employee === activeUser.name); if (!myOldAlloc) { alert("错误：找不到您的分配信息。"); return; }
-        const newRatio = Number(document.getElementById('employee-ratio-input').value); if (newRatio === myOldAlloc.ratio) { alert('比例未改变。'); return; }
-        const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0');
-        modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString('en-CA'), approvalStatus: 'pending', type: 'employee_suggestion', submitter: {name: activeUser.name}, details: { from: myOldAlloc.ratio, to: newRatio } });
-        item.status = 'modification_pending'; alert('您的修改建议已提交给核算专员审核。'); closeModal('details-modal'); renderAll();
-    }
-    window.submitJoinRequest = function(itemId) {
-        const item = businessData.find(d => d.id === itemId); const newRatio = Number(document.getElementById('employee-join-ratio-input').value); if (!newRatio || newRatio <= 0 || newRatio > 100) { alert('请输入一个有效的申请比例 (1-100)。'); return; }
-        const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0');
-        modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString('en-CA'), approvalStatus: 'pending', type: 'employee_join_request', submitter: {name: activeUser.name}, details: { to: newRatio } });
-        item.status = 'modification_pending'; alert('您的参与申请已提交给核算专员审核。'); closeModal('details-modal'); renderAll();
-    }
+    window.submitRatioChangeSuggestion = function(itemId, oldRatio, newRatio) { const item = businessData.find(d => d.id === itemId); const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0'); modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString('en-CA'), approvalStatus: 'pending', type: 'employee_suggestion', submitter: {name: activeUser.name}, details: { from: oldRatio, to: newRatio } }); item.status = 'modification_pending'; alert('您的修改建议已提交给核算专员审核。'); closeModal('details-modal'); renderAll(); }
     window.openAllocationModal = function(itemId) {
-        activeItemId = itemId; const item = businessData.find(d => d.id === itemId); const modal = document.getElementById('allocation-modal'); closeModal('details-modal');
-        document.getElementById('alloc-modal-contract-id').textContent = item.contractId;
-        const empSelect = document.getElementById('employee-to-add'); empSelect.innerHTML = employees.map(e => `<option value="${e.name}">${e.name} (${e.id})</option>`).join('');
-        const allocationDiv = document.getElementById('modal-allocations'); let currentEditableAllocation = JSON.parse(JSON.stringify(item.finalAllocation.length > 0 ? item.finalAllocation : []));
+        activeItemId = itemId; const item = businessData.find(d => d.id === itemId); const modal = document.getElementById('allocation-modal'); closeModal('details-modal'); document.getElementById('alloc-modal-contract-id').textContent = item.contractId; const empSelect = document.getElementById('employee-to-add'); empSelect.innerHTML = employees.map(e => `<option value="${e.name}">${e.name} (${e.id})</option>`).join(''); const allocationDiv = document.getElementById('modal-allocations'); let currentEditableAllocation = JSON.parse(JSON.stringify(item.finalAllocation.length > 0 ? item.finalAllocation : []));
         const renderRows = () => { allocationDiv.innerHTML = ''; currentEditableAllocation.forEach(alloc => { allocationDiv.innerHTML += `<div class="allocation-row"><label>${alloc.employee}:</label><input type="number" class="alloc-input" data-employee="${alloc.employee}" value="${alloc.ratio}"> %<button class="remove-employee-btn" onclick="removeEmployeeFromAllocation('${alloc.employee}')">&times;</button></div>`; }); updateTotal(); };
         const updateTotal = () => { let total = 0; modal.querySelectorAll('.alloc-input').forEach(input => total += Number(input.value) || 0); const totalEl = document.getElementById('alloc-total'); totalEl.textContent = total; totalEl.style.color = total > 100 ? 'var(--hitachi-red)' : (total === 100 ? '#4CAF50' : 'var(--text-primary)'); };
-        window.addEmployeeToAllocation = () => { const empName = empSelect.value; if (!currentEditableAllocation.some(a => a.employee === empName)) { currentEditableAllocation.push({ employee: empName, ratio: 0, confirmed: false }); renderRows(); } };
+        window.addEmployeeToAllocation = () => { const empName = empSelect.value; if (!currentEditableAllocation.some(a => a.employee === empName)) { currentEditableAllocation.push({ employee: empName, ratio: 0 }); renderRows(); } };
         window.removeEmployeeFromAllocation = (empName) => { currentEditableAllocation = currentEditableAllocation.filter(a => a.employee !== empName); renderRows(); };
         document.getElementById('save-allocation-btn').onclick = () => {
-            const newAllocation = []; let total = 0; modal.querySelectorAll('.alloc-input').forEach(input => { const ratio = Number(input.value); total += ratio; if(ratio > 0) newAllocation.push({ employee: input.dataset.employee, ratio, confirmed: false }); });
+            const newAllocation = []; let total = 0; modal.querySelectorAll('.alloc-input').forEach(input => { const ratio = Number(input.value); total += ratio; if(ratio > 0) newAllocation.push({ employee: input.dataset.employee, ratio}); });
             if (total > 100) { alert('错误：分配总比例不能超过100%！'); return; }
-            if (item.status === 'approved' || item.status === 'modification_pending') {
-                const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0');
-                modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString('en-CA'), approvalStatus: 'pending', type: 'specialist_rewrite', submitter: {name: '核算专员'}, details: {old: item.finalAllocation, new: newAllocation} });
-                item.status = 'modification_pending'; alert('修改已保存，已生成申请并推送到处理中心待审批。');
-            } else { item.finalAllocation = newAllocation; item.status = newAllocation.length > 0 ? 'pending_confirmation' : 'pending_allocation'; alert('分配方案已保存，请等待员工确认。'); }
-            closeModal('allocation-modal'); renderAll();
+            const reqId = 'MOD-' + String(modificationRequests.length + 1).padStart(3, '0'); modificationRequests.push({ id: reqId, businessId: item.id, contractId: item.contractId, timestamp: new Date().toLocaleDateString('en-CA'), approvalStatus: 'pending', type: 'specialist_rewrite', submitter: {name: '核算专员'}, details: {old: item.finalAllocation, new: newAllocation} }); item.status = 'modification_pending'; alert('修改已保存，已生成申请并推送到处理中心待审批。'); closeModal('allocation-modal'); renderAll();
         };
         allocationDiv.oninput = updateTotal; renderRows(); modal.style.display = 'block';
     }
-    window.exportData = () => {
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; csvContent += "合同号,项目名称,客户,金额,保养作业时间,合同生效时间,状态,分配方案\n";
-        businessData.forEach(item => { const allocationStr = `"${formatAllocation(item.finalAllocation)}"`; const row = [item.contractId, item.project, item.client, item.amount, item.maintenanceDate, item.contractEffectiveDate, getStatusBadge(item.status).replace(/<[^>]*>/g, ""), allocationStr].join(","); csvContent += row + "\n"; });
-        const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "business_data_export.csv"); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    window.exportData = () => { let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; csvContent += "合同号,项目名称,客户,金额,保养作业时间,合同生效时间,状态,分配方案\n"; businessData.forEach(item => { const allocationStr = `"${formatAllocation(item.finalAllocation)}"`; const row = [item.contractId, item.project, item.client, item.amount, item.maintenanceDate, item.contractEffectiveDate, getStatusBadge(item.status).replace(/<[^>]*>/g, ""), allocationStr].join(","); csvContent += row + "\n"; }); const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "business_data_export.csv"); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+    window.openAddMissingBusinessModal = () => document.getElementById('add-missing-business-modal').style.display = 'block';
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+    window.switchSpecialistTab = function(tabName) { specialistActiveTab = tabName; renderAllocationTable(); }
+    window.toggleAllCheckboxes = function(checked) { document.querySelectorAll('#allocation-table .item-checkbox').forEach(cb => cb.checked = checked); }
+    window.applyFilters = () => renderAllocationTable();
+    window.clearFilters = () => {
+        const mDate = document.getElementById('filter-maintenance-date');
+        const eDate = document.getElementById('filter-effective-date');
+        const status = document.getElementById('filter-status');
+        if (mDate) mDate.value = ''; if (eDate) eDate.value = ''; if (status) status.value = '';
+        renderAllocationTable();
+    };
+    window.batchConfirmItems = function() {
+        const selectedIds = Array.from(document.querySelectorAll('#allocation-table .item-checkbox:checked')).map(cb => Number(cb.dataset.id));
+        if (selectedIds.length === 0) { alert('请至少选择一个条目进行确认。'); return; }
+        let confirmedCount = 0;
+        selectedIds.forEach(id => { const item = businessData.find(d => d.id === id); if (item && item.status === 'unconfirmed') { item.status = 'confirmed'; confirmedCount++; } });
+        alert(`成功确认了 ${confirmedCount} 个条目。`); renderAllocationTable();
+    }
+    window.openModificationModalForEmployee = function(itemId) {
+         const item = businessData.find(d => d.id === itemId); if (!item) return; const myAlloc = item.finalAllocation.find(a => a.employee === activeUser.name);
+         if (item.status === 'confirmed' || item.status === 'modification_pending') { alert(`此条目当前状态为 [${getStatusBadge(item.status).replace(/<[^>]*>/g, "")}]，已锁定或正在审批中，暂时无法发起新的修改。`); return; }
+         if (myAlloc) {
+             const newRatio = prompt(`您正在申请修改项目 [${item.project}] 的提成比例。\n\n当前比例: ${myAlloc.ratio}%\n请输入您的新比例 (0-100):`, myAlloc.ratio);
+             if (newRatio !== null) { const newRatioNum = Number(newRatio); if (isNaN(newRatioNum) || newRatioNum < 0 || newRatioNum > 100) { alert('请输入有效的数字 (0-100)。'); return; } if (newRatioNum === myAlloc.ratio) { alert('比例未改变，已取消操作。'); return; } submitRatioChangeSuggestion(item.id, myAlloc.ratio, newRatioNum); }
+         } else { alert("您目前未参与此项目，请通过“补充遗漏业务”功能申请加入。"); }
     }
 
-    // --- INIT & NAVIGATION (Unchanged) ---
+
     const switchPage = (pageId) => {
         document.querySelectorAll('.nav-menu li').forEach(l => l.classList.remove('active'));
         const link = document.querySelector(`.nav-menu li[data-page="${pageId}"]`);
@@ -630,59 +707,49 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + pageId));
         renderAll();
     };
-    
     const renderAll = () => {
-        renderAllocationTable();
-        renderModificationProcessingTable();
-        renderEmployeeRequestsApprovalTable();
+        const activePageId = document.querySelector('.page.active').id.replace('page-','');
+        switch(activePageId) {
+            case 'allocation': renderAllocationTable(); break;
+            case 'modification-processing': renderModificationProcessingTable(); break;
+            case 'employee-requests-approval': renderEmployeeRequestsApprovalTable(); break;
+        }
     }
 
     document.querySelectorAll('.nav-menu li').forEach(link => link.addEventListener('click', () => switchPage(link.dataset.page)));
-    
     document.getElementById('role-switcher').addEventListener('change', (e) => { 
-        currentUserRole = e.target.value;
-        const isSpecialist = currentUserRole === 'specialist';
-        
-        if (isSpecialist) { activeUser = { id: '000797881', name: '核算专员' }; } 
-        else { activeUser = { id: 'E001', name: '张三' }; }
-
+        const selectedValue = e.target.value; const isSpecialist = selectedValue === 'specialist';
+        if (isSpecialist) { currentUserRole = 'specialist'; activeUser = { id: '000797881', name: '核算专员' }; } 
+        else { currentUserRole = 'employee'; const userId = selectedValue.split('_')[1]; activeUser = employees.find(emp => emp.id === userId); }
         document.getElementById('user-name').textContent = `${activeUser.name} (${activeUser.id})`;
         document.querySelector('.nav-menu li.specialist-only').style.display = isSpecialist ? 'flex' : 'none';
-        
         const activePageId = document.querySelector('.page.active').id.replace('page-','');
-        if (!isSpecialist && (activePageId === 'employee-requests-approval')) { switchPage('allocation'); } 
-        else { renderAll(); }
+        if (!isSpecialist && (activePageId === 'employee-requests-approval')) { switchPage('allocation'); } else { renderAll(); }
     });
-    
-    document.querySelectorAll('.modal .close-btn').forEach(btn => btn.onclick = (e) => {
-        e.stopPropagation();
-        btn.closest('.modal').style.display = 'none'
-    });
+    document.querySelectorAll('.modal .close-btn').forEach(btn => btn.onclick = (e) => { e.stopPropagation(); btn.closest('.modal').style.display = 'none' });
 
-    // *** NEW: THEME SWITCHER LOGIC ***
     const themeToggle = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme');
-
-    const applyTheme = (theme) => {
-        if (theme === 'light') {
-            document.body.classList.add('light-mode');
-            themeToggle.checked = true;
-        } else {
-            document.body.classList.remove('light-mode');
-            themeToggle.checked = false;
-        }
-    };
-
-    if (currentTheme) {
-        applyTheme(currentTheme);
-    }
-
-    themeToggle.addEventListener('change', function(e) {
-        const selectedTheme = e.target.checked ? 'light' : 'dark';
-        localStorage.setItem('theme', selectedTheme);
-        applyTheme(selectedTheme);
-    });
+    const applyTheme = (theme) => { if (theme === 'light') { document.body.classList.add('light-mode'); themeToggle.checked = true; } else { document.body.classList.remove('light-mode'); themeToggle.checked = false; } };
+    applyTheme(localStorage.getItem('theme'));
+    themeToggle.addEventListener('change', function(e) { const selectedTheme = e.target.checked ? 'light' : 'dark'; localStorage.setItem('theme', selectedTheme); applyTheme(selectedTheme); });
     
+    const viewModeToggle = document.getElementById('view-mode-toggle');
+    const mobileIcon = document.getElementById('mobile-icon');
+    const desktopIcon = document.getElementById('desktop-icon');
+    const applyViewMode = (mode) => {
+        if (mode === 'mobile') { document.body.classList.add('mobile-view'); mobileIcon.style.display = 'none'; desktopIcon.style.display = 'block';
+        } else { document.body.classList.remove('mobile-view'); mobileIcon.style.display = 'block'; desktopIcon.style.display = 'none'; }
+        renderAll();
+    }
+    viewModeToggle.addEventListener('click', () => {
+        const currentMode = document.body.classList.contains('mobile-view') ? 'mobile' : 'desktop';
+        const newMode = currentMode === 'mobile' ? 'desktop' : 'mobile';
+        localStorage.setItem('viewMode', newMode);
+        applyViewMode(newMode);
+    });
+    applyViewMode(localStorage.getItem('viewMode') || 'desktop');
+
+
     // Initial Load
     document.getElementById('role-switcher').dispatchEvent(new Event('change'));
     switchPage('home'); 
